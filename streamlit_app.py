@@ -1,151 +1,90 @@
 import streamlit as st
 import pandas as pd
-import math
-from pathlib import Path
 
-# Set the title and favicon that appear in the Browser's tab bar.
-st.set_page_config(
-    page_title='GDP dashboard',
-    page_icon=':earth_americas:', # This is an emoji shortcode. Could be a URL too.
-)
+# Set page configuration
+st.set_page_config(page_title="VapeRadar Dashboard", page_icon="🚭", layout="wide")
 
-# -----------------------------------------------------------------------------
-# Declare some useful functions.
+# Header
+st.title("🚭 VapeRadar Dashboard")
+st.markdown("**Real-Time Vape Detection Monitoring**")
+st.divider()
 
-@st.cache_data
-def get_gdp_data():
-    """Grab GDP data from a CSV file.
+# --- Summary Cards ---
+col1, col2, col3, col4 = st.columns(4)
 
-    This uses caching to avoid having to read the file every time. If we were
-    reading from an HTTP endpoint instead of a file, it's a good idea to set
-    a maximum age to the cache with the TTL argument: @st.cache_data(ttl='1d')
-    """
+with col1:
+    st.metric(label="Total Sensors", value="12")
+with col2:
+    st.metric(label="Active Sensors", value="11")
+with col3:
+    st.metric(label="Vape Alerts Today", value="7")
+with col4:
+    st.metric(label="Campus Air Clarity", value="87%")
 
-    # Instead of a CSV on disk, you could read from an HTTP endpoint here too.
-    DATA_FILENAME = Path(__file__).parent/'data/gdp_data.csv'
-    raw_gdp_df = pd.read_csv(DATA_FILENAME)
+st.divider()
 
-    MIN_YEAR = 1960
-    MAX_YEAR = 2022
+# --- Sensor Locations & Details ---
+st.subheader("📍 Sensor Locations")
 
-    # The data above has columns like:
-    # - Country Name
-    # - Country Code
-    # - [Stuff I don't care about]
-    # - GDP for 1960
-    # - GDP for 1961
-    # - GDP for 1962
-    # - ...
-    # - GDP for 2022
-    #
-    # ...but I want this instead:
-    # - Country Name
-    # - Country Code
-    # - Year
-    # - GDP
-    #
-    # So let's pivot all those year-columns into two: Year and GDP
-    gdp_df = raw_gdp_df.melt(
-        ['Country Code'],
-        [str(x) for x in range(MIN_YEAR, MAX_YEAR + 1)],
-        'Year',
-        'GDP',
-    )
-
-    # Convert years from string to integers
-    gdp_df['Year'] = pd.to_numeric(gdp_df['Year'])
-
-    return gdp_df
-
-gdp_df = get_gdp_data()
-
-# -----------------------------------------------------------------------------
-# Draw the actual page
-
-# Set the title that appears at the top of the page.
-'''
-# :earth_americas: GDP dashboard
-
-Browse GDP data from the [World Bank Open Data](https://data.worldbank.org/) website. As you'll
-notice, the data only goes to 2022 right now, and datapoints for certain years are often missing.
-But it's otherwise a great (and did I mention _free_?) source of data.
-'''
-
-# Add some spacing
-''
-''
-
-min_value = gdp_df['Year'].min()
-max_value = gdp_df['Year'].max()
-
-from_year, to_year = st.slider(
-    'Which years are you interested in?',
-    min_value=min_value,
-    max_value=max_value,
-    value=[min_value, max_value])
-
-countries = gdp_df['Country Code'].unique()
-
-if not len(countries):
-    st.warning("Select at least one country")
-
-selected_countries = st.multiselect(
-    'Which countries would you like to view?',
-    countries,
-    ['DEU', 'FRA', 'GBR', 'BRA', 'MEX', 'JPN'])
-
-''
-''
-''
-
-# Filter the data
-filtered_gdp_df = gdp_df[
-    (gdp_df['Country Code'].isin(selected_countries))
-    & (gdp_df['Year'] <= to_year)
-    & (from_year <= gdp_df['Year'])
+# Data for our sensors
+sensors = [
+    {
+        "id": "A01", "color": "🟢", "loc": "Building A - Floor 1", "clarity": 96, 
+        "status": "Clean Air", "voc": "120 ppb", "pm": "8 μg/m³", "co2": "420 ppm", "time": "09:12"
+    },
+    {
+        "id": "A02", "color": "🟡", "loc": "Building A - Floor 2", "clarity": 78, 
+        "status": "Slightly Abnormal", "voc": "340 ppb", "pm": "18 μg/m³", "co2": "700 ppm", "time": "11:03"
+    },
+    {
+        "id": "B01", "color": "🔴", "loc": "Library Entrance", "clarity": 51, 
+        "status": "High Risk", "voc": "640 ppb", "pm": "54 μg/m³", "co2": "980 ppm", "time": "10:15"
+    },
+    {
+        "id": "C01", "color": "🟣", "loc": "Bathroom Block C", "clarity": 12, 
+        "status": "Severe Detection", "voc": "945 ppb", "pm": "142 μg/m³", "co2": "1520 ppm", "time": "13:28"
+    }
 ]
 
-st.header('GDP over time', divider='gray')
+# Create a grid layout for the sensors
+sensor_cols = st.columns(4)
 
-''
+# Recreating the "click for details" modal feature using Streamlit Expanders
+for i, sensor in enumerate(sensors):
+    with sensor_cols[i]:
+        with st.expander(f"{sensor['color']} Sensor {sensor['id']} - {sensor['clarity']}%", expanded=False):
+            st.markdown(f"**Location:** {sensor['loc']}")
+            st.markdown(f"**Status:** {sensor['status']}")
+            st.divider()
+            st.markdown("### Sensor Readings")
+            st.markdown(f"**VOC:** {sensor['voc']}")
+            st.markdown(f"**PM2.5:** {sensor['pm']}")
+            st.markdown(f"**CO₂:** {sensor['co2']}")
+            st.markdown(f"**Last Detection:** {sensor['time']}")
 
-st.line_chart(
-    filtered_gdp_df,
-    x='Year',
-    y='GDP',
-    color='Country Code',
-)
+# Legend
+st.caption("🟢 90-100% Clean Air | 🟡 70-89% Slightly Abnormal | 🔴 40-69% High Risk | 🟣 0-39% Severe Detection")
+st.divider()
 
-''
-''
+# --- Detection History ---
+st.subheader("⚠ Detection History")
 
+# Create a Pandas DataFrame for the table
+history_data = {
+    "Time": ["09:42", "10:15", "11:03", "13:28"],
+    "Sensor": ["A01", "B01", "C01", "C01"],
+    "Air Clarity": ["63%", "51%", "27%", "12%"],
+    "Status": ["High Risk", "High Risk", "Severe Detection", "Severe Detection"]
+}
+df_history = pd.DataFrame(history_data)
 
-first_year = gdp_df[gdp_df['Year'] == from_year]
-last_year = gdp_df[gdp_df['Year'] == to_year]
+# Display the table
+st.dataframe(df_history, use_container_width=True, hide_index=True)
 
-st.header(f'GDP in {to_year}', divider='gray')
+st.divider()
 
-''
-
-cols = st.columns(4)
-
-for i, country in enumerate(selected_countries):
-    col = cols[i % len(cols)]
-
-    with col:
-        first_gdp = first_year[first_year['Country Code'] == country]['GDP'].iat[0] / 1000000000
-        last_gdp = last_year[last_year['Country Code'] == country]['GDP'].iat[0] / 1000000000
-
-        if math.isnan(first_gdp):
-            growth = 'n/a'
-            delta_color = 'off'
-        else:
-            growth = f'{last_gdp / first_gdp:,.2f}x'
-            delta_color = 'normal'
-
-        st.metric(
-            label=f'{country} GDP',
-            value=f'{last_gdp:,.0f}B',
-            delta=growth,
-            delta_color=delta_color
-        )
+# --- Hotspot Map ---
+st.subheader("🗺 Vape Hotspot Map")
+st.markdown("View live hotspots and historical detection areas.")
+if st.button("Open Hotspot Map", type="primary"):
+    st.info("Map interface would load here. (Requires mapping library integration like Folium or PyDeck).")
