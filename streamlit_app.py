@@ -46,7 +46,16 @@ def load_sensor_data():
             
         # 3. Format Date/Time and Sort
         if 'Timestamp' in df.columns:
-            df['Timestamp'] = pd.to_datetime(df['Timestamp'], errors='coerce')
+            # Tell Python that the day comes first (DD/MM/YYYY) so it sorts correctly
+            df['Timestamp'] = pd.to_datetime(df['Timestamp'], errors='coerce', dayfirst=True)
+            
+            # --- TIMEZONE FIX ---
+            # If your sensor logs in UTC, add your local time offset here.
+            # For example, if you are in Thailand (UTC +7), use hours=7.
+            # If you are in New York (UTC -4), use hours=-4.
+            df['Timestamp'] = df['Timestamp'] + pd.Timedelta(hours=7) 
+            
+            # Clean and sort
             df = df.dropna(subset=['Timestamp']) # Remove any rows with broken dates
             df = df.sort_values(by='Timestamp', ascending=False)
             
