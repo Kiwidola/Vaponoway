@@ -61,19 +61,30 @@ latest = df.iloc[0].to_frame().T
 
 # --- 4. RUN MODEL PREDICTION ---
 if my_model:
-    # Ensure these 5 features match exactly what your Random Forest was trained on
-    features = latest[['TVOC', 'eCO2', 'Temp', 'Humidity', 'PM2.5']]
+    # 1. Select the raw data
+    raw_data = latest[['TVOC', 'eCO2', 'Temp', 'Humidity', 'PM2.5']]
+    
+    # 2. Rename them to match the model's training labels
+    # NOTE: Change these keys ('col_2', etc.) to match EXACTLY what your model expects!
+    prediction_df = raw_data.rename({
+        'TVOC': 'col_2',
+        'eCO2': 'col_3',
+        'Temp': 'col_4',
+        'Humidity': 'col_5',
+        'PM2.5': 'col_6'
+    })
+    
+    # 3. Transpose so the model sees it as one row, not one column
+    input_features = prediction_df.to_frame().T
+    
     try:
-        prediction = my_model.predict(features)[0]
+        prediction = my_model.predict(input_features)[0]
         if prediction == 1:
             st.error("🚨 VAPE DETECTED: AI Model indicates vape particles!")
         else:
             st.success("✅ AIR QUALITY: Clean.")
     except Exception as e:
-        st.error(f"Prediction error: {e}. Ensure feature columns match model input.")
-else:
-    st.info("ℹ️ Prediction system offline (Model file missing or invalid).")
-
+        st.error(f"Prediction error: {e}")
 # --- METRICS & GRAPHS ---
 col1, col2, col3, col4 = st.columns(4)
 col1.metric("Temp", f"{latest['Temp'].values[0]} °C")
