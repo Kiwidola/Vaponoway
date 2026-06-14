@@ -90,23 +90,31 @@ else:
 if my_model:
     st.subheader("⚠️ Detection History")
     
-    # Prepare historical data for prediction
-    # We use the same feature mapping and selection as the latest row
-    hist_features = df[['TVOC', 'eCO2', 'Temp', 'Humidity', 'PM2.5', 'CH0', 'CH3', 'MQ135']].rename(columns=mapping_dict)
-    
     # Run prediction on full history
+    hist_features = df[['TVOC', 'eCO2', 'Temp', 'Humidity', 'PM2.5', 'CH0', 'CH3', 'MQ135']].rename(columns=mapping_dict)
     df['is_vape'] = my_model.predict(hist_features)
     
-    # Filter for detected events
-    vape_events = df[df['is_vape'] == 1].copy()
+    # Identify continuous blocks
+    # Detects changes in state to group consecutive '1's
+    df['block'] = (df['is_vape'] != df['is_vape'].shift()).cumsum()
+    vape_blocks = df[df['is_vape'] == 1].groupby('block')
     
-    if not vape_events.empty:
-        # Display the formatted timestamps
-        st.write("Vape particles were detected at the following times:")
-        st.dataframe(
-            vape_events[['Display_Time']].sort_values(by='Display_Time', ascending=False),
-            use_container_width=True
-        )
+    if not vape_blocks.empty:
+        for _, group in vape_blocks:
+            start_time = group['Display_Time'].min().strftime('%H:%M')
+            end_time = group['Display_Time'].max().strftime('%H:%M')
+            date_str = group['Display_Time'].min().strftime('%Y-%m-%d')
+            
+            # Format the time string (e.g., "16:00 - 17:00")
+            time_range = f"{start_time} - {end_time}"
+            
+            # Display as red text with description
+            st.markdown(
+                f"<div style='color: #ff4b4b; font-weight: bold; padding: 5px; border-left: 5px solid #ff4b4b; margin-bottom: 5px;'>"
+                f"🚨 Vape Detected: {date_str} at {time_range}"
+                f"</div>", 
+                unsafe_allow_html=True
+            )
     else:
         st.write("No vape events detected in the available data.")
 # --- METRICS & GRAPHS ---
