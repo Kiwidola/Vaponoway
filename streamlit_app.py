@@ -9,7 +9,7 @@ MODEL_PATH = "models/rf_model_unified.joblib"
 MODEL_NAME = "Aurafarm AI"
 SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8Oho84O3uIYEEYE2iNub7I5Ktv4mTUteMkdBR4NpBTlJZS0tY2VFXmqM-_XlGIgSaeUIR7VjpnWSZ/pub?output=csv"
 
-st.set_page_config(page_title=MODEL_NAME, page_icon="🚭", layout="wide")
+st.set_page_config(page_title=MODEL_NAME, layout="wide")
 
 
 # --- 1. LOAD MODEL ---
@@ -22,7 +22,7 @@ def load_model():
             st.error(f"Error loading model: {e}")
             return None
     else:
-        st.warning(f"⚠️ Model file not found at {MODEL_PATH}.")
+        st.warning(f"Model file not found at {MODEL_PATH}.")
         return None
 
 
@@ -66,7 +66,7 @@ def load_sensor_data():
 df = load_sensor_data()
 
 # --- 3. DASHBOARD UI ---
-st.title(f"🚭 {MODEL_NAME} Dashboard")
+st.title(f"{MODEL_NAME} Dashboard")
 if df.empty:
     st.warning("No data found.")
     st.stop()
@@ -95,19 +95,19 @@ if my_model:
     try:
         prediction = my_model.predict(features)[0]
         if prediction == 1:
-            st.error("🚨 VAPE DETECTED: AI Model indicates vape particles!")
+            st.error("VAPE DETECTED: AI Model indicates vape particles!")
         else:
-            st.success("✅ AIR QUALITY: Clean.")
+            st.success("AIR QUALITY: Clean.")
     except Exception as e:
         st.error(f"Prediction error: {e}")
         st.write("Model expects these feature names:", my_model.feature_names_in_)
 else:
-    st.info("ℹ️ Prediction system offline.")
+    st.info("Prediction system offline.")
 
 
 # --- 5. VAPE DETECTION HISTORY ---
 if my_model:
-    st.subheader("⚠️ Detection History")
+    st.subheader("Detection History")
 
     hist_features = df[
         ["TVOC", "eCO2", "Temp", "Humidity", "PM2.5", "CH0", "CH3", "MQ135"]
@@ -135,7 +135,7 @@ if my_model:
 
             st.markdown(
                 f"<div style='color: #ff4b4b; font-weight: bold; padding: 10px; border-left: 5px solid #ff4b4b; background-color: #fff0f0; margin-bottom: 10px; border-radius: 4px;'>"
-                f"🚨 Vape Detected: {date_str} {time_range}"
+                f"Vape Detected: {date_str} {time_range}"
                 f"</div>",
                 unsafe_allow_html=True,
             )
@@ -153,7 +153,7 @@ col4.metric("PM 2.5", f"{latest['PM2.5'].values[0]} μg/m³")
 st.caption(f"Last updated (Sensor Time): {latest['Display_Time'].values[0]}")
 st.divider()
 
-st.subheader("📈 Past 24 Hours Trends")
+st.subheader("Past 24 Hours Trends")
 chart_data = df.sort_values(by="Sort_Time", ascending=True)
 cutoff = chart_data["Sort_Time"].max() - pd.Timedelta(days=1)
 chart_data = chart_data[chart_data["Sort_Time"] >= cutoff]
@@ -164,7 +164,7 @@ chart_data = (
     chart_data[numeric_cols].resample("1min").mean().interpolate(method="time")
 )
 
-tab1, tab2, tab3 = st.tabs(["🌫️ Particles", "🌬️ Air Quality", "🌡️ Climate"])
+tab1, tab2, tab3 = st.tabs(["Particles", "Air Quality", "Climate"])
 with tab1:
     st.line_chart(chart_data[["PM2.5", "PM10", "MQ135"]])
 with tab2:
@@ -175,7 +175,7 @@ with tab3:
 
 # --- 6. SIMULATED SENSOR NETWORK MAP ---
 st.divider()
-st.subheader("📍 Facility Sensor Network")
+st.subheader("Facility Sensor Network")
 
 base_lat = 18.5847
 base_lon = 99.0256
@@ -194,7 +194,6 @@ mock_sensors["color"] = mock_sensors["vape_detected"].map({1: [255, 75, 75, 255]
 col_map, col_text = st.columns([2, 1])
 
 with col_map:
-    # 1. Bake the layer
     layer = pdk.Layer(
         "ScatterplotLayer", 
         data=mock_sensors, 
@@ -207,10 +206,8 @@ with col_map:
         pickable=True
     )
     
-    # 2. Set the camera
     view_state = pdk.ViewState(latitude=base_lat, longitude=base_lon, zoom=16.5, pitch=0)
     
-    # 3. Put the layer in the deck with an informative tooltip
     st.pydeck_chart(pdk.Deck(
         layers=[layer], 
         initial_view_state=view_state, 
