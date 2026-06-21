@@ -111,26 +111,43 @@ st.caption(f"Last updated (Sensor Time): {latest['Display_Time'].values[0]}")
 st.divider()
 
 # --- 6. SIMULATED SENSOR NETWORK MAP ---
+st.divider()
 st.subheader("Facility Sensor Network")
 
-# Auto-Location logic
+# 1. Get Auto-Location safely
 loc = streamlit_geolocation()
-auto_lat = loc.get('latitude', 18.5847)
-auto_lon = loc.get('longitude', 99.0256)
+# If loc is None, use the defaults immediately
+auto_lat = loc.get('latitude', 18.5847) if loc else 18.5847
+auto_lon = loc.get('longitude', 99.0256) if loc else 99.0256
 
+# 2. Manual Input Setup
 col_lat, col_lon = st.columns(2)
-base_lat = col_lat.number_input("Latitude", value=auto_lat, format="%.4f")
-base_lon = col_lon.number_input("Longitude", value=auto_lon, format="%.4f")
+base_lat = col_lat.number_input("Latitude", value=float(auto_lat), format="%.4f")
+base_lon = col_lon.number_input("Longitude", value=float(auto_lon), format="%.4f")
 
 live_state = 1 if ('prediction' in locals() and prediction == 1) else 0
+
+# 3. Use float() to ensure math is safe even if variables act up
 mock_sensors = pd.DataFrame({
     'sensor_id': ['Facility Center', 'SN-01 (Main Lobby)', 'SN-02 (East Restroom)', 'SN-03 (Breakroom)', 'SN-04 (Stairwell B)'],
-    'latitude': [base_lat, base_lat + 0.0004, base_lat + 0.0004, base_lat - 0.0005, base_lat + 0.0002],
-    'longitude': [base_lon, base_lon, base_lon - 0.0006, base_lon - 0.0002, base_lon + 0.0005],
+    'latitude': [
+        float(base_lat), 
+        float(base_lat) + 0.0004, 
+        float(base_lat) + 0.0004, 
+        float(base_lat) - 0.0005, 
+        float(base_lat) + 0.0002
+    ],
+    'longitude': [
+        float(base_lon), 
+        float(base_lon), 
+        float(base_lon) - 0.0006, 
+        float(base_lon) - 0.0002, 
+        float(base_lon) + 0.0005
+    ],
     'vape_detected': [0, live_state, 1, 0, 0],
     'air_quality': ['Your Location', 'Good', 'Poor (Vape)', 'Good', 'Good']
 })
-
+# ... (rest of the mapping code stays the same)
 def get_color(row):
     if row['sensor_id'] == 'Facility Center': return [0, 100, 255, 255]
     return [255, 75, 75, 255] if row['vape_detected'] == 1 else [0, 204, 102, 255]
