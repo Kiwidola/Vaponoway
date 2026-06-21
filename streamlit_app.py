@@ -207,15 +207,9 @@ mock_sensors["color"] = mock_sensors["vape_detected"].map(
 col_map, col_text = st.columns([2, 1])
 
 with col_map:
-    layer = pdk.Layer(
-        "ScatterplotLayer",
-        data=mock_sensors,
-        get_position=["longitude", "latitude"],
-        get_fill_color="color",
-        get_radius=12,
-        radius_units="pixels",
-        pickable=True,
-    )
+    layer = pdk.Layer("ScatterplotLayer", data=mock_sensors, get_position=["longitude", "latitude"], get_fill_color="color", get_radius=4, radius_units="meters", radius_min_pixels=3, radius_max_pixels=14, pickable=True)
+    view_state = pdk.ViewState(latitude=base_lat, longitude=base_lon, zoom=16.5, pitch=0)
+    st.pydeck_chart(pdk.Deck(layers=[layer], initial_view_state=view_state, tooltip={"text": "{sensor_id}"}))
 
     view_state = pdk.ViewState(
         latitude=base_lat, longitude=base_lon, zoom=16.5, pitch=0
