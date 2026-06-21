@@ -178,8 +178,12 @@ with col_map:
         data=mock_sensors,
         get_position=["longitude", "latitude"],
         get_fill_color="color",
-        get_radius=12,          # The size of the dot...
-        radius_units="pixels",  # <-- THE MAGIC: Lock to screen pixels, not map meters
+        
+        # --- THE CLAMPED SIZING STRATEGY ---
+        get_radius=25,         # Base size: 25 real-world meters
+        radius_min_pixels=3,   # Zoomed way out? Shrink down to a tiny 3px laser speck.
+        radius_max_pixels=10,  # Zoomed way in? Cap out at a polite 10px dot.
+        
         pickable=True
     )
 
