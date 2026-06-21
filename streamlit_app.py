@@ -3,7 +3,6 @@ import joblib
 import pandas as pd
 import pydeck as pdk
 import streamlit as st
-from streamlit_geolocation import streamlit_geolocation
 
 # --- CONFIGURATION ---
 MODEL_PATH = "models/rf_model_unified.joblib"
@@ -69,8 +68,9 @@ latest = df.iloc[0].to_frame().T
 
 # --- 4. RUN MODEL PREDICTION ---
 prediction = None
+mapping_dict = {"TVOC": "col_2", "eCO2": "col_3", "Temp": "col_4", "Humidity": "col_5", "PM2.5": "col_6", "CH0": "col_7", "CH3": "col_8", "MQ135": "col_9"}
+
 if my_model:
-    mapping_dict = {"TVOC": "col_2", "eCO2": "col_3", "Temp": "col_4", "Humidity": "col_5", "PM2.5": "col_6", "CH0": "col_7", "CH3": "col_8", "MQ135": "col_9"}
     features = latest[["TVOC", "eCO2", "Temp", "Humidity", "PM2.5", "CH0", "CH3", "MQ135"]].rename(columns=mapping_dict)
     try:
         prediction = my_model.predict(features)[0]
@@ -110,56 +110,51 @@ col4.metric("PM 2.5", f"{latest['PM2.5'].values[0]} μg/m³")
 st.caption(f"Last updated (Sensor Time): {latest['Display_Time'].values[0]}")
 st.divider()
 
+st.subheader("Past 24 Hours Trends")
+chart_data = df.sort_values(by="Sort_Time", ascending=True)
+cutoff = chart_data["Sort_Time"].max() - pd.Timedelta(days=1)
+chart_data = chart_data[chart_data["Sort_Time"] >= cutoff]
+chart_data = chart_data.set_index("Sort_Time")
+numeric_cols = chart_data.select_dtypes(include="number").columns
+chart_data = (chart_data[numeric_cols].resample("1min").mean().interpolate(method="time"))
+
+tab1, tab2, tab3 = st.tabs(["Particles", "Air Quality", "Climate"])
+with tab1:
+    st.line_chart(chart_data[["PM2.5", "PM10", "MQ135"]])
+with tab2:
+    st.line_chart(chart_data[["TVOC", "eCO2"]])
+with tab3:
+    st.line_chart(chart_data[["Temp", "Humidity"]])
+
 # --- 6. SIMULATED SENSOR NETWORK MAP ---
 st.divider()
 st.subheader("Facility Sensor Network")
 
-# 1. Manual Input Setup (No automatic tracking)
 col_lat, col_lon = st.columns(2)
 base_lat = col_lat.number_input("Latitude", value=18.5847, format="%.4f")
 base_lon = col_lon.number_input("Longitude", value=99.0256, format="%.4f")
 
 live_state = 1 if ('prediction' in locals() and prediction == 1) else 0
 
-# 2. Build DataFrame
 mock_sensors = pd.DataFrame({
-    'sensor_id': ['Facility Center', 'SN-01 (Main Lobby)', 'SN-02 (East Restroom)', 'SN-03 (Breakroom)', 'SN-04 (Stairwell B)'],
-    'latitude': [
-        base_lat, base_lat + 0.0004, base_lat + 0.0004, 
-        base_lat - 0.0005, base_lat + 0.0002
-    ],
-    'longitude': [
-        base_lon, base_lon, base_lon - 0.0006, 
-        base_lon - 0.0002, base_lon + 0.0005
-    ],
-    'vape_detected': [0, live_state, 1, 0, 0],
-    'air_quality': ['Facility Center', 'Good', 'Poor (Vape)', 'Good', 'Good']
+    'sensor_id': ['SN-01 (Main Lobby)', 'SN-02 (East Restroom)', 'SN-03 (Breakroom)', 'SN-04 (Stairwell B)'],
+    'latitude': [base_lat + 0.0004, base_lat + 0.0004, base_lat - 0.0005, base_lat + 0.0002],
+    'longitude': [base_lon, base_lon - 0.0006, base_lon - 0.0002, base_lon + 0.0005],
+    'vape_detected': [live_state, 1, 0, 0],
+    'air_quality': ['Good', 'Poor (Vape)', 'Good', 'Good']
 })
 
-# 3. Define Colors
-def get_color(row):
-    if row['sensor_id'] == 'Facility Center': return [0, 100, 255, 255] # Blue
-    return [255, 75, 75, 255] if row['vape_detected'] == 1 else [0, 204, 102, 255] # Red/Green
+mock_sensors["color"] = mock_sensors["vape_detected"].map({1: [255, 75, 75, 255], 0: [0, 204, 102, 255]})
 
-mock_sensors["color"] = mock_sensors.apply(get_color, axis=1)
-
-# 4. Render Map
 col_map, col_text = st.columns([2, 1])
 
 with col_map:
-    layer = pdk.Layer(
-        "ScatterplotLayer", data=mock_sensors, get_position=["longitude", "latitude"], 
-        get_fill_color="color", get_radius=6, radius_units="meters", 
-        radius_min_pixels=5, radius_max_pixels=16, pickable=True
-    )
+    layer = pdk.Layer("ScatterplotLayer", data=mock_sensors, get_position=["longitude", "latitude"], get_fill_color="color", get_radius=6, radius_units="meters", radius_min_pixels=5, radius_max_pixels=16, pickable=True)
     view_state = pdk.ViewState(latitude=base_lat, longitude=base_lon, zoom=16.5, pitch=0)
-    st.pydeck_chart(pdk.Deck(
-        layers=[layer], initial_view_state=view_state, 
-        tooltip={"text": "Location: {sensor_id}\nStatus: {air_quality}"}
-    ))
+    st.pydeck_chart(pdk.Deck(layers=[layer], initial_view_state=view_state, tooltip={"text": "Sensor: {sensor_id}\nStatus: {air_quality}"}))
 
 with col_text:
     st.write("### Live Node Status")
     for _, row in mock_sensors.iterrows():
-        color = "#0064ff" if row['sensor_id'] == 'Facility Center' else ("#ff4b4b" if row['vape_detected'] == 1 else "#00cc66")
+        color = "#ff4b4b" if row['vape_detected'] == 1 else "#00cc66"
         st.markdown(f"**{row['sensor_id']}** \n<small style='color:{color};'>● {row['air_quality']}</small>", unsafe_allow_html=True)
