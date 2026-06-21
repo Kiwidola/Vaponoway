@@ -116,7 +116,6 @@ st.subheader("Facility Sensor Network")
 
 # 1. Get Auto-Location safely
 loc = streamlit_geolocation()
-# If loc is None, use the defaults immediately
 auto_lat = loc.get('latitude', 18.5847) if loc else 18.5847
 auto_lon = loc.get('longitude', 99.0256) if loc else 99.0256
 
@@ -127,38 +126,42 @@ base_lon = col_lon.number_input("Longitude", value=float(auto_lon), format="%.4f
 
 live_state = 1 if ('prediction' in locals() and prediction == 1) else 0
 
-# 3. Use float() to ensure math is safe even if variables act up
+# 3. Build DataFrame
 mock_sensors = pd.DataFrame({
     'sensor_id': ['Facility Center', 'SN-01 (Main Lobby)', 'SN-02 (East Restroom)', 'SN-03 (Breakroom)', 'SN-04 (Stairwell B)'],
     'latitude': [
-        float(base_lat), 
-        float(base_lat) + 0.0004, 
-        float(base_lat) + 0.0004, 
-        float(base_lat) - 0.0005, 
-        float(base_lat) + 0.0002
+        float(base_lat), float(base_lat) + 0.0004, float(base_lat) + 0.0004, 
+        float(base_lat) - 0.0005, float(base_lat) + 0.0002
     ],
     'longitude': [
-        float(base_lon), 
-        float(base_lon), 
-        float(base_lon) - 0.0006, 
-        float(base_lon) - 0.0002, 
-        float(base_lon) + 0.0005
+        float(base_lon), float(base_lon), float(base_lon) - 0.0006, 
+        float(base_lon) - 0.0002, float(base_lon) + 0.0005
     ],
     'vape_detected': [0, live_state, 1, 0, 0],
     'air_quality': ['Your Location', 'Good', 'Poor (Vape)', 'Good', 'Good']
 })
-# ... (rest of the mapping code stays the same)
+
+# 4. Define Colors
 def get_color(row):
-    if row['sensor_id'] == 'Facility Center': return [0, 100, 255, 255]
-    return [255, 75, 75, 255] if row['vape_detected'] == 1 else [0, 204, 102, 255]
+    if row['sensor_id'] == 'Facility Center': return [0, 100, 255, 255] # Blue
+    return [255, 75, 75, 255] if row['vape_detected'] == 1 else [0, 204, 102, 255] # Red/Green
 
 mock_sensors["color"] = mock_sensors.apply(get_color, axis=1)
+
+# 5. Render Map
 col_map, col_text = st.columns([2, 1])
 
 with col_map:
-    layer = pdk.Layer("ScatterplotLayer", data=mock_sensors, get_position=["longitude", "latitude"], get_fill_color="color", get_radius=6, radius_units="meters", radius_min_pixels=5, radius_max_pixels=16, pickable=True)
-    view_state = pdk.ViewState(latitude=base_lat, longitude=base_lon, zoom=16.5, pitch=0)
-    st.pydeck_chart(pdk.Deck(layers=[layer], initial_view_state=view_state, tooltip={"text": "Location: {sensor_id}\nStatus: {air_quality}"}))
+    layer = pdk.Layer(
+        "ScatterplotLayer", data=mock_sensors, get_position=["longitude", "latitude"], 
+        get_fill_color="color", get_radius=6, radius_units="meters", 
+        radius_min_pixels=5, radius_max_pixels=16, pickable=True
+    )
+    view_state = pdk.ViewState(latitude=float(base_lat), longitude=float(base_lon), zoom=16.5, pitch=0)
+    st.pydeck_chart(pdk.Deck(
+        layers=[layer], initial_view_state=view_state, 
+        tooltip={"text": "Location: {sensor_id}\nStatus: {air_quality}"}
+    ))
 
 with col_text:
     st.write("### Live Node Status")
