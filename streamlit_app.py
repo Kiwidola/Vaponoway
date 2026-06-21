@@ -3,7 +3,17 @@ import joblib
 import pandas as pd
 import pydeck as pdk
 import streamlit as st
+from streamlit_geolocation import streamlit_geolocation
 
+# Ask the browser for your location
+location = streamlit_geolocation()
+
+if location and location['latitude'] is not None:
+    base_lat = location['latitude']
+    base_lon = location['longitude']
+else:
+    # Fallback to default if location isn't available
+    base_lat, base_lon = 18.5847, 99.0256
 # --- CONFIGURATION ---
 MODEL_PATH = "models/rf_model_unified.joblib"
 MODEL_NAME = "Aurafarm AI"
