@@ -5,7 +5,7 @@ import pydeck as pdk
 import streamlit as st
 
 # --- CONFIGURATION ---
-MODEL_PATH = "models/rf_model_unified.joblib"
+MODEL_PATH = "models/rf_model_new.joblib"
 MODEL_NAME = "Aurafarm AI"
 SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8Oho84O3uIYEEYE2iNub7I5Ktv4mTUteMkdBR4NpBTlJZS0tY2VFXmqM-_XlGIgSaeUIR7VjpnWSZ/pub?output=csv"
 
