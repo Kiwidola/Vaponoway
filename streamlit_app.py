@@ -3,6 +3,7 @@ import joblib
 import pandas as pd
 import pydeck as pdk
 import streamlit as st
+import plotly.express as px
 
 # --- CONFIGURATION ---
 MODEL_PATH = "models/rf_model_unified.joblib"
@@ -105,7 +106,7 @@ if my_model:
     else:
         st.info("No vape events detected in the available data.")
 
-# --- METRICS & GRAPHS ---
+# --- METRICS ---
 col1, col2, col3, col4 = st.columns(4)
 col1.metric("Temp", f"{latest['Temp'].values[0]} °C")
 col2.metric("Humidity", f"{latest['Humidity'].values[0]} %")
@@ -119,16 +120,21 @@ st.subheader("All Time Sensor Trends")
 chart_data = df.sort_values(by="Sort_Time", ascending=True)
 chart_data = chart_data.set_index("Sort_Time")
 numeric_cols = chart_data.select_dtypes(include="number").columns
-# Resample to 1 minute, filling missing data
 chart_data = (chart_data[numeric_cols].resample("1min").mean().interpolate(method="time"))
 
 tab1, tab2, tab3 = st.tabs(["Particles", "Air Quality", "Climate"])
+
+def plot_interactive(df, cols):
+    fig = px.line(df, y=cols)
+    fig.update_xaxes(rangeslider_visible=True)
+    return fig
+
 with tab1:
-    st.line_chart(chart_data[["PM2.5", "PM10", "MQ135"]])
+    st.plotly_chart(plot_interactive(chart_data, ["PM2.5", "PM10", "MQ135"]), use_container_width=True)
 with tab2:
-    st.line_chart(chart_data[["TVOC", "eCO2"]])
+    st.plotly_chart(plot_interactive(chart_data, ["TVOC", "eCO2"]), use_container_width=True)
 with tab3:
-    st.line_chart(chart_data[["Temp", "Humidity"]])
+    st.plotly_chart(plot_interactive(chart_data, ["Temp", "Humidity"]), use_container_width=True)
 
 # --- 6. SIMULATED SENSOR NETWORK MAP ---
 st.divider()
