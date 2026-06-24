@@ -106,18 +106,20 @@ if my_model:
         st.info("No vape events detected in the available data.")
 
 # --- METRICS & GRAPHS ---
-# ... (Keep your existing metrics code)
+col1, col2, col3, col4 = st.columns(4)
+col1.metric("Temp", f"{latest['Temp'].values[0]} °C")
+col2.metric("Humidity", f"{latest['Humidity'].values[0]} %")
+col3.metric("TVOC", f"{latest['TVOC'].values[0]} ppb")
+col4.metric("PM 2.5", f"{latest['PM2.5'].values[0]} μg/m³")
+st.caption(f"Last updated (Sensor Time): {latest['Display_Time'].values[0]}")
+st.divider()
 
+# --- ALL TIME TRENDS ---
 st.subheader("All Time Sensor Trends")
-
-# Sort and prepare data without the 24-hour filter
 chart_data = df.sort_values(by="Sort_Time", ascending=True)
 chart_data = chart_data.set_index("Sort_Time")
-
-# Select numeric columns
 numeric_cols = chart_data.select_dtypes(include="number").columns
-
-# Resample and interpolate (using 1min or adjust to a larger interval if the dataset is massive)
+# Resample to 1 minute, filling missing data
 chart_data = (chart_data[numeric_cols].resample("1min").mean().interpolate(method="time"))
 
 tab1, tab2, tab3 = st.tabs(["Particles", "Air Quality", "Climate"])
@@ -127,6 +129,7 @@ with tab2:
     st.line_chart(chart_data[["TVOC", "eCO2"]])
 with tab3:
     st.line_chart(chart_data[["Temp", "Humidity"]])
+
 # --- 6. SIMULATED SENSOR NETWORK MAP ---
 st.divider()
 st.subheader("Facility Sensor Network")
