@@ -4,6 +4,7 @@ import pandas as pd
 import pydeck as pdk
 import streamlit as st
 import plotly.express as px
+from datetime import timedelta
 
 # --- CONFIGURATION ---
 MODEL_PATH = "models/rf_model_unified.joblib"
@@ -122,13 +123,15 @@ chart_data = chart_data.set_index("Sort_Time")
 numeric_cols = chart_data.select_dtypes(include="number").columns
 chart_data = (chart_data[numeric_cols].resample("1min").mean().interpolate(method="time"))
 
-tab1, tab2, tab3 = st.tabs(["Particles", "Air Quality", "Climate"])
-
 def plot_interactive(df, cols):
     fig = px.line(df, y=cols)
-    fig.update_xaxes(rangeslider_visible=True)
+    # Set range to last 24 hours based on the latest data point
+    max_time = df.index.max()
+    min_time = max_time - timedelta(hours=24)
+    fig.update_xaxes(rangeslider_visible=True, range=[min_time, max_time])
     return fig
 
+tab1, tab2, tab3 = st.tabs(["Particles", "Air Quality", "Climate"])
 with tab1:
     st.plotly_chart(plot_interactive(chart_data, ["PM2.5", "PM10", "MQ135"]), use_container_width=True)
 with tab2:
@@ -139,7 +142,6 @@ with tab3:
 # --- 6. SIMULATED SENSOR NETWORK MAP ---
 st.divider()
 st.subheader("Facility Sensor Network")
-
 live_state = 1 if ('prediction' in locals() and prediction == 1) else 0
 
 mock_sensors = pd.DataFrame({
@@ -153,7 +155,6 @@ mock_sensors = pd.DataFrame({
 mock_sensors["color"] = mock_sensors["vape_detected"].map({1: [255, 75, 75, 255], 0: [0, 204, 102, 255]})
 
 col_map, col_text = st.columns([2, 1])
-
 with col_map:
     layer = pdk.Layer("ScatterplotLayer", data=mock_sensors, get_position=["longitude", "latitude"], get_fill_color="color", get_radius=6, radius_units="meters", radius_min_pixels=5, radius_max_pixels=16, pickable=True)
     view_state = pdk.ViewState(latitude=BASE_LAT, longitude=BASE_LON, zoom=16.5, pitch=0)
