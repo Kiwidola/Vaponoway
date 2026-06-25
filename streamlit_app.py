@@ -125,10 +125,17 @@ chart_data = (chart_data[numeric_cols].resample("1min").mean().interpolate(metho
 
 def plot_interactive(df, cols):
     fig = px.line(df, y=cols)
-    # Set range to last 24 hours based on the latest data point
     max_time = df.index.max()
     min_time = max_time - timedelta(hours=24)
-    fig.update_xaxes(rangeslider_visible=True, range=[min_time, max_time])
+    
+    # Enable pan and zoom, and set initial 24h range
+    fig.update_xaxes(
+        rangeslider_visible=True, 
+        range=[min_time, max_time],
+        fixedrange=False
+    )
+    # Enable unified hover for easier readability
+    fig.update_layout(hovermode="x unified", dragmode="pan")
     return fig
 
 tab1, tab2, tab3 = st.tabs(["Particles", "Air Quality", "Climate"])
