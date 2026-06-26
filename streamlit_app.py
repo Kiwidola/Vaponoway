@@ -369,7 +369,7 @@ with col_map:
         pdk.Deck(
             layers=[layer],
             initial_view_state=view_state,
-            map_style="mapbox://styles/mapbox/dark-v10",
+            map_style="dark",
             tooltip={"text": "Sensor: {sensor_id}\nStatus: {air_quality}"},
         )
     )
