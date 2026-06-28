@@ -164,7 +164,7 @@ with col_map:
         data=mock_sensors, 
         get_position=["longitude", "latitude"], 
         get_fill_color="color", 
-        get_radius=10, 
+        get_radius=4, # Reduced radius for a smaller dot
         radius_units="meters", 
         pickable=True
     )
@@ -176,8 +176,12 @@ with col_map:
 
 with col_text:
     st.write("### Live Sensor Data")
-    # Display the actual latest row of data from your CSV
-    st.dataframe(latest.T.rename(columns={latest.index[0]: "Current Value"}), use_container_width=True)
+    
+    # Filter only the requested columns
+    cols_to_show = ["Timestamp", "TVOC", "eCO2", "Temp", "Humidity", "PM2.5"]
+    filtered_data = latest[cols_to_show].T.rename(columns={latest.index[0]: "Current Value"})
+    
+    st.dataframe(filtered_data, use_container_width=True)
     
     # Status indicator
     color = "#ff4b4b" if live_state == 1 else "#00cc66"
