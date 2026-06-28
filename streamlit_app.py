@@ -73,7 +73,8 @@ h1, h2, h3, h4 { color: #e6edf3; letter-spacing: -0.3px; }
     letter-spacing: 1.3px;
     text-transform: uppercase;
     color: #6e7681;
-    margin-bottom: 12px;
+    margin-top: 4px;
+    margin-bottom: 18px;
     display: flex;
     align-items: center;
     gap: 7px;
@@ -86,13 +87,21 @@ h1, h2, h3, h4 { color: #e6edf3; letter-spacing: -0.3px; }
     border: 1px solid #30363d !important;
     border-radius: 14px !important;
     box-shadow: 0 4px 24px rgba(0,0,0,0.35);
-    padding: 16px 16px !important;
-    margin-bottom: 14px !important;
+    padding: 20px !important;
+    margin-top: 12px !important;
+    margin-bottom: 24px !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+}
+[data-testid="stVerticalBlockBorderWrapper"] > div {
+    overflow: hidden;
+    border-radius: 14px;
 }
 @media (min-width: 768px) {
     [data-testid="stVerticalBlockBorderWrapper"] {
         padding: 24px 26px !important;
-        margin-bottom: 20px !important;
+        margin-top: 16px !important;
+        margin-bottom: 28px !important;
     }
 }
 
@@ -146,8 +155,8 @@ h1, h2, h3, h4 { color: #e6edf3; letter-spacing: -0.3px; }
 /* ── Metric grid — 2 cols on mobile, 4 on tablet, 7 on desktop ── */
 .metric-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
 }
 @media (min-width: 540px)  { .metric-grid { grid-template-columns: repeat(4, 1fr); } }
 @media (min-width: 900px)  { .metric-grid { grid-template-columns: repeat(7, 1fr); } }
@@ -167,8 +176,8 @@ h1, h2, h3, h4 { color: #e6edf3; letter-spacing: -0.3px; }
 /* ── Quick stats grid — 2×2 on mobile, 4 col on desktop ── */
 .qs-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
     margin-bottom: 4px;
 }
 @media (min-width: 640px) { .qs-grid { grid-template-columns: repeat(4, 1fr); } }
