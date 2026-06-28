@@ -148,13 +148,19 @@ with tab3:
 
 # --- 6. SIMULATED SENSOR NETWORK MAP ---
 st.divider()
-st.subheader("Facility Sensor Network")
+st.subheader("Map")
+
+# Set the single location for the facility here
+MY_LAT = 18.5847
+MY_LON = 99.0256
+
 live_state = 1 if ('prediction' in locals() and prediction == 1) else 0
 
+# Positions relative to the central MY_LAT and MY_LON
 mock_sensors = pd.DataFrame({
     'sensor_id': ['SN-01 (Main Lobby)', 'SN-02 (East Restroom)', 'SN-03 (Breakroom)', 'SN-04 (Stairwell B)'],
-    'latitude': [BASE_LAT + 0.0004, BASE_LAT + 0.0004, BASE_LAT - 0.0005, BASE_LAT + 0.0002],
-    'longitude': [BASE_LON, BASE_LON - 0.0006, BASE_LON - 0.0002, BASE_LON + 0.0005],
+    'latitude': [MY_LAT + 0.0004, MY_LAT + 0.0004, MY_LAT - 0.0005, MY_LAT + 0.0002],
+    'longitude': [MY_LON, MY_LON - 0.0006, MY_LON - 0.0002, MY_LON + 0.0005],
     'vape_detected': [live_state, 1, 0, 0],
     'air_quality': ['Good', 'Poor (Vape)', 'Good', 'Good']
 })
@@ -163,9 +169,23 @@ mock_sensors["color"] = mock_sensors["vape_detected"].map({1: [255, 75, 75, 255]
 
 col_map, col_text = st.columns([2, 1])
 with col_map:
-    layer = pdk.Layer("ScatterplotLayer", data=mock_sensors, get_position=["longitude", "latitude"], get_fill_color="color", get_radius=6, radius_units="meters", radius_min_pixels=5, radius_max_pixels=16, pickable=True)
-    view_state = pdk.ViewState(latitude=BASE_LAT, longitude=BASE_LON, zoom=16.5, pitch=0)
-    st.pydeck_chart(pdk.Deck(layers=[layer], initial_view_state=view_state, tooltip={"text": "Sensor: {sensor_id}\nStatus: {air_quality}"}))
+    view_state = pdk.ViewState(latitude=MY_LAT, longitude=MY_LON, zoom=16.5, pitch=0)
+    layer = pdk.Layer(
+        "ScatterplotLayer", 
+        data=mock_sensors, 
+        get_position=["longitude", "latitude"], 
+        get_fill_color="color", 
+        get_radius=6, 
+        radius_units="meters", 
+        radius_min_pixels=5, 
+        radius_max_pixels=16, 
+        pickable=True
+    )
+    st.pydeck_chart(pdk.Deck(
+        layers=[layer], 
+        initial_view_state=view_state, 
+        tooltip={"text": "Sensor: {sensor_id}\nStatus: {air_quality}"}
+    ))
 
 with col_text:
     st.write("### Live Node Status")
