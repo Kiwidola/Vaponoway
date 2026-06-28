@@ -338,18 +338,18 @@ with col_map:
     live_state = 1 if prediction == 1 else 0
 
     mock_sensors = pd.DataFrame({
-    "sensor_id": ["Main Sensor"],
-    "latitude": [BASE_LAT],
-    "longitude": [BASE_LON],
-    "vape_detected": [live_state],
-    "air_quality": [
-        "⚠ Vape Detected" if live_state else "✅ Clean"
-    ],
-})
+        "sensor_id": ["Main Sensor"],
+        "latitude": [BASE_LAT],
+        "longitude": [BASE_LON],
+        "vape_detected": [live_state],
+        "air_quality": [
+            "⚠ Vape Detected" if live_state else "✅ Clean"
+        ],
+    })
 
-mock_sensors["color"] = mock_sensors["vape_detected"].map(
-    {1: [255, 75, 75, 220], 0: [0, 204, 102, 220]}
-)
+    mock_sensors["color"] = mock_sensors["vape_detected"].map(
+        {1: [255, 75, 75, 220], 0: [0, 204, 102, 220]}
+    )
 
     layer = pdk.Layer(
         "ScatterplotLayer",
@@ -362,27 +362,6 @@ mock_sensors["color"] = mock_sensors["vape_detected"].map(
         radius_max_pixels=18,
         pickable=True,
     )
-    view_state = pdk.ViewState(latitude=BASE_LAT, longitude=BASE_LON, zoom=16.5, pitch=0)
-    st.pydeck_chart(
-        pdk.Deck(
-            layers=[layer],
-            initial_view_state=view_state,
-            map_style="dark",
-            tooltip={"text": "Sensor: {sensor_id}\nStatus: {air_quality}"},
-        )
-    )
-
-    # Node status list
-    st.markdown("**Live Node Status**")
-    for _, row in mock_sensors.iterrows():
-        pill_class = "pill-red" if row["vape_detected"] else "pill-green"
-        st.markdown(
-            f"<div class='node-card'>"
-            f"<span>{row['sensor_id']}</span>"
-            f"<span class='{pill_class}'>{row['air_quality']}</span>"
-            f"</div>",
-            unsafe_allow_html=True,
-        )
 
 st.divider()
 
