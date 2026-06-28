@@ -397,7 +397,7 @@ with col_map:
 # ─────────────────────────────────────────────
 # TREND CHARTS  (respect sidebar hours_back)
 # ─────────────────────────────────────────────
-st.markdown(f"### 📈 Sensor Trends — Last {hours_back} Hours")
+st.markdown(f"### Sensor Trends — Last {hours_back} Hours")
 
 chart_data = df.sort_values("Sort_Time", ascending=True).copy()
 cutoff     = chart_data["Sort_Time"].max() - pd.Timedelta(hours=hours_back)
@@ -413,22 +413,22 @@ if my_model and "is_vape" in df.columns:
         .set_index("Sort_Time")[["is_vape"]]
         .resample("1min")
         .max()
-        .rename(columns={"is_vape": "⚠ Vape Event"})
+        .rename(columns={"is_vape": "Vape Event"})
     )
     chart_data = chart_data.join(vape_overlay, how="left")
 
-tab1, tab2, tab3, tab4 = st.tabs(["🟤 Particles", "🌫 Air Quality", "🌡 Climate", "📊 All Sensors"])
+tab1, tab2, tab3, tab4 = st.tabs(["Particles", "Air Quality", "Climate", "All Sensors"])
 
 with tab1:
     cols_p = [c for c in ["PM2.5", "PM10", "MQ135"] if c in chart_data.columns]
-    if "⚠ Vape Event" in chart_data.columns:
-        cols_p.append("⚠ Vape Event")
+    if "Vape Event" in chart_data.columns:
+        cols_p.append("Vape Event")
     st.line_chart(chart_data[cols_p])
 
 with tab2:
     cols_a = [c for c in ["TVOC", "eCO2"] if c in chart_data.columns]
-    if "⚠ Vape Event" in chart_data.columns:
-        cols_a.append("⚠ Vape Event")
+    if "Vape Event" in chart_data.columns:
+        cols_a.append("Vape Event")
     st.line_chart(chart_data[cols_a])
 
 with tab3:
