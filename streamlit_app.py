@@ -230,7 +230,7 @@ if my_model:
 # ─────────────────────────────────────────────
 # PAGE HEADER
 # ─────────────────────────────────────────────
-st.markdown("## Vapo noWay — Facility Monitor")
+st.markdown("## Aurafarm")
 
 # ── Status banner ──────────────────────────────
 if prediction is None:
