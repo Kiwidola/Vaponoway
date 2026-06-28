@@ -149,7 +149,7 @@ my_model = load_model()
 # ─────────────────────────────────────────────
 # LOAD DATA
 # ─────────────────────────────────────────────
-@st.cache_data(ttl=30)
+@st.cache_data
 def load_sensor_data():
     try:
         df = pd.read_csv(SHEET_URL)
@@ -338,20 +338,18 @@ with col_map:
     live_state = 1 if prediction == 1 else 0
 
     mock_sensors = pd.DataFrame({
-        "sensor_id":    ["SN-01 (Main Lobby)", "SN-02 (East Restroom)", "SN-03 (Breakroom)", "SN-04 (Stairwell B)"],
-        "latitude":     [BASE_LAT + 0.0004,    BASE_LAT + 0.0004,       BASE_LAT - 0.0005,   BASE_LAT + 0.0002],
-        "longitude":    [BASE_LON,              BASE_LON - 0.0006,       BASE_LON - 0.0002,   BASE_LON + 0.0005],
-        "vape_detected":[live_state,            0,                        0,                   0],
-        "air_quality":  [
-            "⚠ Vape Detected" if live_state else "✅ Clean",
-            "✅ Clean",
-            "✅ Clean",
-            "✅ Clean",
-        ],
-    })
-    mock_sensors["color"] = mock_sensors["vape_detected"].map(
-        {1: [255, 75, 75, 220], 0: [0, 204, 102, 220]}
-    )
+    "sensor_id": ["Main Sensor"],
+    "latitude": [BASE_LAT],
+    "longitude": [BASE_LON],
+    "vape_detected": [live_state],
+    "air_quality": [
+        "⚠ Vape Detected" if live_state else "✅ Clean"
+    ],
+})
+
+mock_sensors["color"] = mock_sensors["vape_detected"].map(
+    {1: [255, 75, 75, 220], 0: [0, 204, 102, 220]}
+)
 
     layer = pdk.Layer(
         "ScatterplotLayer",
