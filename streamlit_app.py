@@ -33,7 +33,7 @@ COLUMN_RENAME  = {
 # ─────────────────────────────────────────────
 # PAGE CONFIG & DARK THEME CSS
 # ─────────────────────────────────────────────
-st.set_page_config(page_title=MODEL_NAME, layout="wide")
+st.set_page_config(page_title="Aurafarm", layout="wide")
 
 st.markdown(
     """
@@ -45,7 +45,7 @@ st.markdown(
     }
     [data-testid="stHeader"]  { background: transparent !important; }
     [data-testid="stSidebar"] { background: #161b22 !important; }
-    .block-container { padding-top: 1.8rem; padding-bottom: 2rem; max-width: 1320px; }
+    .block-container { padding-top: 1.8rem; padding-bottom: 2rem; max-width: 98% !important; padding-left: 2rem !important; padding-right: 2rem !important; }
 
     /* ── Typography — Inter / Segoe UI (original) ── */
     * { font-family: 'Inter', 'Segoe UI', sans-serif; }
