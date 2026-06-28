@@ -323,7 +323,7 @@ mock_sensors["fill_b"] = mock_sensors["vape_detected"].map({1: 73,  0: 80})
 # ─────────────────────────────────────────────
 with st.container(border=True):
     st.markdown(
-        "<div class='hero-title'>Aurafarm</div>"
+        "<div class='hero-title'>VAPONOWAY</div>"
         "<div class='hero-sub'>Facility Air Quality Monitor</div>",
         unsafe_allow_html=True,
     )
