@@ -73,8 +73,7 @@ h1, h2, h3, h4 { color: #e6edf3; letter-spacing: -0.3px; }
     letter-spacing: 1.3px;
     text-transform: uppercase;
     color: #6e7681;
-    margin-top: 4px;
-    margin-bottom: 18px;
+    margin-bottom: 12px;
     display: flex;
     align-items: center;
     gap: 7px;
@@ -87,23 +86,25 @@ h1, h2, h3, h4 { color: #e6edf3; letter-spacing: -0.3px; }
     border: 1px solid #30363d !important;
     border-radius: 14px !important;
     box-shadow: 0 4px 24px rgba(0,0,0,0.35);
-    padding: 20px !important;
-    margin-top: 12px !important;
-    margin-bottom: 24px !important;
-    overflow: hidden !important;
+    padding: 18px 16px !important;
+    margin-bottom: 16px !important;
+    margin-top: 4px !important;
     box-sizing: border-box !important;
-}
-[data-testid="stVerticalBlockBorderWrapper"] > div {
-    overflow: hidden;
-    border-radius: 14px;
 }
 @media (min-width: 768px) {
     [data-testid="stVerticalBlockBorderWrapper"] {
         padding: 24px 26px !important;
-        margin-top: 16px !important;
-        margin-bottom: 28px !important;
+        margin-bottom: 22px !important;
     }
 }
+/* Nested cards — no double shadow, tighter spacing */
+[data-testid="stVerticalBlockBorderWrapper"] [data-testid="stVerticalBlockBorderWrapper"] {
+    box-shadow: none !important;
+    margin-bottom: 10px !important;
+    margin-top: 0 !important;
+}
+/* Give every chart card extra bottom breathing room */
+.chart-card-spacer { margin-bottom: 8px; }
 
 /* ── Metric cards ── */
 [data-testid="stMetric"] {
@@ -155,8 +156,8 @@ h1, h2, h3, h4 { color: #e6edf3; letter-spacing: -0.3px; }
 /* ── Metric grid — 2 cols on mobile, 4 on tablet, 7 on desktop ── */
 .metric-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
 }
 @media (min-width: 540px)  { .metric-grid { grid-template-columns: repeat(4, 1fr); } }
 @media (min-width: 900px)  { .metric-grid { grid-template-columns: repeat(7, 1fr); } }
@@ -176,8 +177,8 @@ h1, h2, h3, h4 { color: #e6edf3; letter-spacing: -0.3px; }
 /* ── Quick stats grid — 2×2 on mobile, 4 col on desktop ── */
 .qs-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
     margin-bottom: 4px;
 }
 @media (min-width: 640px) { .qs-grid { grid-template-columns: repeat(4, 1fr); } }
@@ -658,27 +659,39 @@ if my_model and "is_vape" in df.columns:
     )
     chart_data = chart_data.join(vape_overlay, how="left")
 
+st.markdown(
+    f"<div style='font-size:0.72rem;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;"
+    f"color:#6e7681;margin-bottom:10px;margin-top:4px;display:flex;align-items:center;gap:7px'>"
+    f"<span style='color:#3fb950;font-size:0.55rem'>●</span>"
+    f"Sensor Trends · Last {HOURS_BACK} Hours</div>",
+    unsafe_allow_html=True,
+)
+
+CHART_H = 260  # tall enough to touch-scrub comfortably
+
+cols_p = [c for c in ["PM2.5", "PM10", "MQ135"] if c in chart_data.columns]
+if "⚠ Vape Event" in chart_data.columns:
+    cols_p.append("⚠ Vape Event")
 with st.container(border=True):
-    st.markdown(f"<div class='eyebrow'>Sensor Trends · Last {HOURS_BACK} Hours</div>", unsafe_allow_html=True)
-    tab1, tab2, tab3, tab4 = st.tabs(["Particles", "Air Quality", "Climate", "All"])
+    st.markdown("<div class='eyebrow'>🟤 Particles</div>", unsafe_allow_html=True)
+    st.line_chart(chart_data[cols_p], height=CHART_H, use_container_width=True)
 
-    with tab1:
-        cols_p = [c for c in ["PM2.5", "PM10", "MQ135"] if c in chart_data.columns]
-        if "⚠ Vape Event" in chart_data.columns: cols_p.append("⚠ Vape Event")
-        st.line_chart(chart_data[cols_p])
+cols_a = [c for c in ["TVOC", "eCO2"] if c in chart_data.columns]
+if "⚠ Vape Event" in chart_data.columns:
+    cols_a.append("⚠ Vape Event")
+with st.container(border=True):
+    st.markdown("<div class='eyebrow'>🌫 Air Quality</div>", unsafe_allow_html=True)
+    st.line_chart(chart_data[cols_a], height=CHART_H, use_container_width=True)
 
-    with tab2:
-        cols_a = [c for c in ["TVOC", "eCO2"] if c in chart_data.columns]
-        if "⚠ Vape Event" in chart_data.columns: cols_a.append("⚠ Vape Event")
-        st.line_chart(chart_data[cols_a])
+cols_c = [c for c in ["Temp", "Humidity"] if c in chart_data.columns]
+with st.container(border=True):
+    st.markdown("<div class='eyebrow'>🌡 Climate</div>", unsafe_allow_html=True)
+    st.line_chart(chart_data[cols_c], height=CHART_H, use_container_width=True)
 
-    with tab3:
-        cols_c = [c for c in ["Temp", "Humidity"] if c in chart_data.columns]
-        st.line_chart(chart_data[cols_c])
-
-    with tab4:
-        display_cols = [c for c in FEATURE_COLS if c in chart_data.columns]
-        st.line_chart(chart_data[display_cols])
+display_cols = [c for c in FEATURE_COLS if c in chart_data.columns]
+with st.container(border=True):
+    st.markdown("<div class='eyebrow'>📊 All Sensors</div>", unsafe_allow_html=True)
+    st.line_chart(chart_data[display_cols], height=CHART_H, use_container_width=True)
 
 # ─────────────────────────────────────────────
 # FOOTER
