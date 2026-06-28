@@ -39,7 +39,7 @@ def load_model():
         except Exception: return None
     return None
 
-# Removed ttl=30 to stop automatic background refreshing
+# Auto-refresh disabled by removing ttl
 @st.cache_data
 def load_sensor_data():
     try:
@@ -92,7 +92,7 @@ st.caption(f"Last updated: {latest['Display_Time']}")
 st.divider()
 
 # ─────────────────────────────────────────────
-# 5. STATUS DISPLAY (Replaces Map)
+# 5. STATUS DISPLAY
 # ─────────────────────────────────────────────
 st.subheader("Current Status")
 live_state = 1 if prediction == 1 else 0
