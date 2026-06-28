@@ -12,8 +12,8 @@ MODEL_NAME = "Aurafarm AI"
 SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8Oho84O3uIYEEYE2iNub7I5Ktv4mTUteMkdBR4NpBTlJZS0tY2VFXmqM-_XlGIgSaeUIR7VjpnWSZ/pub?output=csv"
 
 # Fixed coordinates for the facility
-BASE_LAT = 18.5847
-BASE_LON = 99.0256
+MY_LAT = 18.5847
+MY_LON = 99.0256
 
 st.set_page_config(page_title=MODEL_NAME, layout="wide")
 
@@ -127,14 +127,7 @@ def plot_interactive(df, cols):
     fig = px.line(df, y=cols)
     max_time = df.index.max()
     min_time = max_time - timedelta(hours=24)
-    
-    # Enable pan and zoom, and set initial 24h range
-    fig.update_xaxes(
-        rangeslider_visible=True, 
-        range=[min_time, max_time],
-        fixedrange=False
-    )
-    # Enable unified hover for easier readability
+    fig.update_xaxes(rangeslider_visible=True, range=[min_time, max_time], fixedrange=False)
     fig.update_layout(hovermode="x unified", dragmode="pan")
     return fig
 
@@ -146,39 +139,33 @@ with tab2:
 with tab3:
     st.plotly_chart(plot_interactive(chart_data, ["Temp", "Humidity"]), use_container_width=True)
 
-# --- 6. SIMULATED SENSOR NETWORK MAP ---
+# --- 6. MAP ---
 st.divider()
 st.subheader("Map")
 
-# Set the single location for the facility here
-MY_LAT = 18.5847
-MY_LON = 99.0256
-
 live_state = 1 if ('prediction' in locals() and prediction == 1) else 0
 
-# Positions relative to the central MY_LAT and MY_LON
-mock_sensors = pd.DataFrame({
-    'sensor_id': ['SN-01 (Main Lobby)', 'SN-02 (East Restroom)', 'SN-03 (Breakroom)', 'SN-04 (Stairwell B)'],
-    'latitude': [MY_LAT + 0.0004, MY_LAT + 0.0004, MY_LAT - 0.0005, MY_LAT + 0.0002],
-    'longitude': [MY_LON, MY_LON - 0.0006, MY_LON - 0.0002, MY_LON + 0.0005],
-    'vape_detected': [live_state, 1, 0, 0],
-    'air_quality': ['Good', 'Poor (Vape)', 'Good', 'Good']
-})
-
+# Define a single sensor
+sensor_data = {
+    'sensor_id': ['SN-01 (Main Location)'],
+    'latitude': [MY_LAT],
+    'longitude': [MY_LON],
+    'vape_detected': [live_state],
+    'air_quality': ['Poor (Vape)' if live_state == 1 else 'Good']
+}
+mock_sensors = pd.DataFrame(sensor_data)
 mock_sensors["color"] = mock_sensors["vape_detected"].map({1: [255, 75, 75, 255], 0: [0, 204, 102, 255]})
 
 col_map, col_text = st.columns([2, 1])
 with col_map:
-    view_state = pdk.ViewState(latitude=MY_LAT, longitude=MY_LON, zoom=16.5, pitch=0)
+    view_state = pdk.ViewState(latitude=MY_LAT, longitude=MY_LON, zoom=17, pitch=0)
     layer = pdk.Layer(
         "ScatterplotLayer", 
         data=mock_sensors, 
         get_position=["longitude", "latitude"], 
         get_fill_color="color", 
-        get_radius=6, 
+        get_radius=10, 
         radius_units="meters", 
-        radius_min_pixels=5, 
-        radius_max_pixels=16, 
         pickable=True
     )
     st.pydeck_chart(pdk.Deck(
@@ -188,7 +175,10 @@ with col_map:
     ))
 
 with col_text:
-    st.write("### Live Node Status")
-    for _, row in mock_sensors.iterrows():
-        color = "#ff4b4b" if row['vape_detected'] == 1 else "#00cc66"
-        st.markdown(f"**{row['sensor_id']}** \n<small style='color:{color};'>● {row['air_quality']}</small>", unsafe_allow_html=True)
+    st.write("### Live Sensor Data")
+    # Display the actual latest row of data from your CSV
+    st.dataframe(latest.T.rename(columns={latest.index[0]: "Current Value"}), use_container_width=True)
+    
+    # Status indicator
+    color = "#ff4b4b" if live_state == 1 else "#00cc66"
+    st.markdown(f"**Status:** <span style='color:{color}; font-weight:bold;'>{mock_sensors.iloc[0]['air_quality']}</span>", unsafe_allow_html=True)
