@@ -38,69 +38,59 @@ st.set_page_config(page_title=MODEL_NAME, layout="wide")
 st.markdown(
     """
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600;700;800&display=swap');
-
     /* ── Dark canvas ── */
     html, body, [data-testid="stAppViewContainer"] {
-        background: #0a0d14 !important;
-        color: #e2e8f0;
+        background: #0d1117 !important;
+        color: #c9d1d9;
     }
     [data-testid="stHeader"]  { background: transparent !important; }
-    [data-testid="stSidebar"] { background: #0f1320 !important; }
+    [data-testid="stSidebar"] { background: #161b22 !important; }
     .block-container { padding-top: 1.8rem; padding-bottom: 2rem; max-width: 1320px; }
 
-    /* ── Typography ── */
-    h1, h2, h3, h4 {
-        font-family: 'Inter', sans-serif;
-        color: #f1f5f9;
-        letter-spacing: -0.4px;
-    }
+    /* ── Typography — Inter / Segoe UI (original) ── */
+    * { font-family: 'Inter', 'Segoe UI', sans-serif; }
+    h1, h2, h3, h4 { color: #e6edf3; letter-spacing: -0.3px; }
 
     /* ── Eyebrow label ── */
     .eyebrow {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 0.68rem;
-        font-weight: 600;
-        letter-spacing: 1.8px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 1.3px;
         text-transform: uppercase;
-        color: #64748b;
-        margin-bottom: 14px;
+        color: #6e7681;
+        margin-bottom: 12px;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 7px;
     }
     .eyebrow::before {
-        content: "";
-        display: inline-block;
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: #22d3ee;
-        box-shadow: 0 0 8px #22d3ee;
+        content: "●";
+        color: #3fb950;
+        font-size: 0.55rem;
     }
 
     /* ── Card containers ── */
     [data-testid="stVerticalBlockBorderWrapper"] {
-        background: #111827 !important;
-        border: 1px solid #1e2a3a !important;
+        background: #161b22 !important;
+        border: 1px solid #30363d !important;
         border-radius: 16px !important;
-        box-shadow: 0 4px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04);
+        box-shadow: 0 4px 24px rgba(0,0,0,0.35);
         padding: 24px 26px !important;
         margin-bottom: 20px !important;
     }
 
     /* ── Metric cards ── */
     [data-testid="stMetric"] {
-        background: #0f1825;
-        border: 1px solid #1e2d40;
+        background: #0d1117;
+        border: 1px solid #21262d;
         border-radius: 12px;
         padding: 16px 18px;
     }
-    [data-testid="stMetricLabel"] { color: #64748b !important; font-size: 0.72rem !important; font-weight: 600 !important; letter-spacing: 0.5px; }
-    [data-testid="stMetricValue"] { color: #f1f5f9 !important; font-size: 1.5rem !important; font-family: 'JetBrains Mono', monospace !important; }
+    [data-testid="stMetricLabel"] { color: #6e7681 !important; font-size: 0.73rem !important; font-weight: 600 !important; }
+    [data-testid="stMetricValue"] { color: #e6edf3 !important; font-size: 1.45rem !important; }
     [data-testid="stMetricDelta"] { font-size: 0.78rem !important; }
 
-    /* ── Hero status pill ── */
+    /* ── Status pill ── */
     .status-pill {
         display: inline-flex;
         align-items: center;
@@ -111,58 +101,45 @@ st.markdown(
         border-radius: 999px;
         font-weight: 700;
         font-size: 1.1rem;
-        letter-spacing: 0.2px;
         white-space: nowrap;
-        font-family: 'Inter', sans-serif;
     }
     .status-vape {
-        background: rgba(239,68,68,0.12);
-        border: 1.5px solid rgba(239,68,68,0.5);
-        color: #fca5a5;
-        box-shadow: 0 0 24px rgba(239,68,68,0.15);
+        background: rgba(248,81,73,0.12);
+        border: 1.5px solid rgba(248,81,73,0.5);
+        color: #ffa198;
+        box-shadow: 0 0 20px rgba(248,81,73,0.12);
     }
     .status-clean {
-        background: rgba(34,211,238,0.08);
-        border: 1.5px solid rgba(34,211,238,0.35);
-        color: #67e8f9;
-        box-shadow: 0 0 24px rgba(34,211,238,0.12);
+        background: rgba(63,185,80,0.10);
+        border: 1.5px solid rgba(63,185,80,0.4);
+        color: #56d364;
+        box-shadow: 0 0 20px rgba(63,185,80,0.10);
     }
     .status-offline {
-        background: rgba(100,116,139,0.12);
-        border: 1.5px solid #334155;
-        color: #94a3b8;
+        background: rgba(110,118,129,0.10);
+        border: 1.5px solid #30363d;
+        color: #6e7681;
     }
 
     /* ── Dataframe ── */
     [data-testid="stDataFrame"] { border-radius: 10px; overflow: hidden; }
-    .dvn-scroller { background: #0f1825 !important; }
 
     /* ── Tabs ── */
     .stTabs [data-baseweb="tab-list"] {
-        background: #0f1320;
+        background: #0d1117;
         border-radius: 10px;
         gap: 4px;
         padding: 4px;
-        border: 1px solid #1e2a3a;
+        border: 1px solid #21262d;
     }
-    .stTabs [data-baseweb="tab"] {
-        background: transparent;
-        color: #64748b;
-        border-radius: 8px;
-        font-size: 0.85rem;
-        font-weight: 500;
-    }
-    .stTabs [data-baseweb="tab"] p { color: inherit !important; }
-    .stTabs [aria-selected="true"] {
-        background: #1e2a3a !important;
-        color: #e2e8f0 !important;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.3);
-    }
+    .stTabs [data-baseweb="tab"]      { background: transparent; color: #6e7681; border-radius: 8px; font-size: 0.85rem; }
+    .stTabs [data-baseweb="tab"] p    { color: inherit !important; }
+    .stTabs [aria-selected="true"]    { background: #21262d !important; color: #e6edf3 !important; box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
 
     /* ── Node status cards ── */
     .node-card {
-        background: #0f1825;
-        border: 1px solid #1e2d40;
+        background: #0d1117;
+        border: 1px solid #21262d;
         border-radius: 10px;
         padding: 11px 16px;
         margin-bottom: 8px;
@@ -170,48 +147,28 @@ st.markdown(
         justify-content: space-between;
         align-items: center;
         font-size: 0.84rem;
-        color: #cbd5e1;
+        color: #8b949e;
     }
-    .node-id {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 0.78rem;
-        color: #94a3b8;
-    }
-    .pill-red   { color: #f87171; font-weight: 700; }
-    .pill-green { color: #34d399; font-weight: 700; }
-    .pill-dot-red   { display:inline-block; width:7px; height:7px; border-radius:50%; background:#ef4444; box-shadow:0 0 6px #ef4444; margin-right:6px; }
-    .pill-dot-green { display:inline-block; width:7px; height:7px; border-radius:50%; background:#10b981; box-shadow:0 0 6px #10b981; margin-right:6px; }
+    .pill-red   { color: #ffa198; font-weight: 700; }
+    .pill-green { color: #56d364; font-weight: 700; }
+    .pill-dot-red   { display:inline-block; width:7px; height:7px; border-radius:50%; background:#f85149; margin-right:5px; }
+    .pill-dot-green { display:inline-block; width:7px; height:7px; border-radius:50%; background:#3fb950; margin-right:5px; }
 
     /* ── Map legend ── */
     .map-legend {
         display: flex;
         gap: 20px;
-        margin-top: 12px;
+        margin-top: 10px;
         font-size: 0.78rem;
-        color: #64748b;
-        font-family: 'JetBrains Mono', monospace;
+        color: #6e7681;
     }
-    .legend-dot {
-        display: inline-block;
-        width: 10px; height: 10px;
-        border-radius: 50%;
-        margin-right: 6px;
-        vertical-align: middle;
-    }
+    .legend-dot { display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:5px; vertical-align:middle; }
 
     /* ── Misc ── */
-    hr { border-color: #1e2a3a; }
-    p, li { color: #94a3b8; }
-    [data-testid="stCaptionContainer"] { color: #475569 !important; }
+    hr { border-color: #21262d; }
+    p, li { color: #8b949e; }
+    [data-testid="stCaptionContainer"] { color: #484f58 !important; }
     .stAlert { border-radius: 10px; }
-
-    /* ── Section divider label ── */
-    .section-sub {
-        font-size: 0.78rem;
-        color: #475569;
-        font-family: 'JetBrains Mono', monospace;
-        margin-bottom: 10px;
-    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -279,62 +236,59 @@ if my_model:
         st.error(f"Prediction error: {e}")
 
 # ─────────────────────────────────────────────
-# SENSOR POSITIONS  (used in both map layers)
+# SENSOR DATA FOR MAP
 # ─────────────────────────────────────────────
 live_state = 1 if prediction == 1 else 0
 
 mock_sensors = pd.DataFrame({
     "sensor_id":    ["SN-01", "SN-02", "SN-03", "SN-04"],
-    "label":        ["Main Lobby", "East Restroom", "Breakroom", "Stairwell B"],
-    "latitude":     [BASE_LAT + 0.0004, BASE_LAT + 0.0004, BASE_LAT - 0.0005, BASE_LAT + 0.0002],
-    "longitude":    [BASE_LON,          BASE_LON - 0.0006,  BASE_LON - 0.0002, BASE_LON + 0.0005],
+    "location":     ["Main Lobby", "East Restroom", "Breakroom", "Stairwell B"],
+    "lat":          [BASE_LAT + 0.0004, BASE_LAT + 0.0004, BASE_LAT - 0.0005, BASE_LAT + 0.0002],
+    "lon":          [BASE_LON,          BASE_LON - 0.0006,  BASE_LON - 0.0002, BASE_LON + 0.0005],
     "vape_detected":[live_state, 0, 0, 0],
 })
 mock_sensors["status_text"] = mock_sensors["vape_detected"].map(
-    {1: "⚠ Vape Detected", 0: "✅ Clean"}
+    {1: "Vape Detected", 0: "Clean"}
 )
-mock_sensors["fill_color"]  = mock_sensors["vape_detected"].map(
-    {1: [239, 68, 68, 230], 0: [34, 211, 238, 200]}
-)
-mock_sensors["ring_color"]  = mock_sensors["vape_detected"].map(
-    {1: [239, 68, 68, 80],  0: [34, 211, 238, 60]}
-)
+# RGBA as lists — used directly by pydeck ScatterplotLayer
+mock_sensors["fill_r"] = mock_sensors["vape_detected"].map({1: 248, 0: 63})
+mock_sensors["fill_g"] = mock_sensors["vape_detected"].map({1: 81,  0: 185})
+mock_sensors["fill_b"] = mock_sensors["vape_detected"].map({1: 73,  0: 80})
 
 # ─────────────────────────────────────────────
 # HERO CARD
 # ─────────────────────────────────────────────
 with st.container(border=True):
     st.markdown(
-        "<div style='text-align:center;font-size:0.7rem;font-family:JetBrains Mono,monospace;"
-        "letter-spacing:2px;color:#334155;text-transform:uppercase;margin-bottom:6px'>"
-        "AURAFARM AI · FACILITY AIR QUALITY MONITOR</div>"
-        "<div style='text-align:center;font-size:2rem;font-weight:800;line-height:1.1;"
-        "color:#f1f5f9;font-family:Inter,sans-serif;margin-bottom:20px'>Vapo noWay</div>",
+        "<div style='text-align:center;font-size:1.7rem;font-weight:800;line-height:1.2;color:#e6edf3'>"
+        "Vapo noWay</div>"
+        "<div style='text-align:center;color:#6e7681;font-size:0.95rem;margin-top:2px;margin-bottom:18px'>"
+        "Facility Air Quality Monitor</div>",
         unsafe_allow_html=True,
     )
 
     if prediction is None:
         st.markdown(
             "<div style='text-align:center'><span class='status-pill status-offline'>"
-            "⚠ Detection Offline</span></div>",
+            "⚠️ Detection Offline</span></div>",
             unsafe_allow_html=True,
         )
     elif prediction == 1:
-        conf_str = f" · {confidence:.0f}% confidence" if confidence else ""
+        conf_str = f" · {confidence:.0f}%" if confidence else ""
         st.markdown(
             f"<div style='text-align:center'>"
             f"<span class='status-pill status-vape'>🚨 Vape Detected{conf_str}</span><br>"
-            f"<div style='color:#475569;font-size:0.72rem;font-family:JetBrains Mono,monospace;"
-            f"margin-top:8px'>Last updated {latest['Display_Time'].strftime('%H:%M:%S')}</div></div>",
+            f"<span style='color:#484f58;font-size:0.78rem'>as of {latest['Display_Time'].strftime('%H:%M:%S')}</span>"
+            f"</div>",
             unsafe_allow_html=True,
         )
     else:
-        conf_str = f" · {confidence:.0f}% confidence" if confidence else ""
+        conf_str = f" · {confidence:.0f}%" if confidence else ""
         st.markdown(
             f"<div style='text-align:center'>"
-            f"<span class='status-pill status-clean'>✦ Air Quality Clean{conf_str}</span><br>"
-            f"<div style='color:#475569;font-size:0.72rem;font-family:JetBrains Mono,monospace;"
-            f"margin-top:8px'>Last updated {latest['Display_Time'].strftime('%H:%M:%S')}</div></div>",
+            f"<span class='status-pill status-clean'>✅ Air Quality Clean{conf_str}</span><br>"
+            f"<span style='color:#484f58;font-size:0.78rem'>as of {latest['Display_Time'].strftime('%H:%M:%S')}</span>"
+            f"</div>",
             unsafe_allow_html=True,
         )
 
@@ -348,7 +302,7 @@ def safe_delta(col):
         return None
 
 with st.container(border=True):
-    st.markdown("<div class='eyebrow'>Live Sensor Readings</div>", unsafe_allow_html=True)
+    st.markdown("<div class='eyebrow'>Live Readings</div>", unsafe_allow_html=True)
     c1, c2, c3, c4, c5, c6, c7 = st.columns(7)
     c1.metric("TVOC",     f"{latest['TVOC']} ppb",    delta=safe_delta("TVOC"),     delta_color="inverse")
     c2.metric("PM 2.5",   f"{latest['PM2.5']} μg/m³", delta=safe_delta("PM2.5"),    delta_color="inverse")
@@ -359,7 +313,7 @@ with st.container(border=True):
     c7.metric("Humidity", f"{latest['Humidity']} %",  delta=safe_delta("Humidity"))
 
 # ─────────────────────────────────────────────
-# DETECTION HISTORY  +  IMPROVED FACILITY MAP
+# DETECTION HISTORY  +  FACILITY MAP
 # ─────────────────────────────────────────────
 col_hist, col_map = st.columns([1, 1], gap="large")
 
@@ -404,15 +358,13 @@ with col_hist:
                 st.caption(f"{len(events_df)} detection event(s) in available data.")
             else:
                 st.markdown(
-                    "<div style='color:#475569;padding:32px 0;text-align:center;"
-                    "font-family:JetBrains Mono,monospace;font-size:0.82rem'>"
+                    "<div style='color:#484f58;padding:28px 0;text-align:center;font-size:0.85rem'>"
                     "No vape events detected in the available data.</div>",
                     unsafe_allow_html=True,
                 )
         else:
             st.markdown(
-                "<div style='color:#475569;padding:32px 0;text-align:center;"
-                "font-family:JetBrains Mono,monospace;font-size:0.82rem'>"
+                "<div style='color:#484f58;padding:28px 0;text-align:center;font-size:0.85rem'>"
                 "Detection system offline — history unavailable.</div>",
                 unsafe_allow_html=True,
             )
@@ -421,97 +373,65 @@ with col_map:
     with st.container(border=True):
         st.markdown("<div class='eyebrow'>Facility Sensor Network</div>", unsafe_allow_html=True)
 
-        # Outer glow ring layer (pulsing effect approximation)
-        ring_layer = pdk.Layer(
+        # ── Glow halo (large translucent ring behind each dot) ──
+        halo_layer = pdk.Layer(
             "ScatterplotLayer",
             data=mock_sensors,
-            get_position=["longitude", "latitude"],
-            get_fill_color="ring_color",
-            get_radius=18,
+            get_position=["lon", "lat"],
+            get_fill_color=["fill_r", "fill_g", "fill_b", 50],
+            get_radius=14,
             radius_units="meters",
-            radius_min_pixels=14,
-            radius_max_pixels=28,
+            radius_min_pixels=12,
+            radius_max_pixels=24,
             pickable=False,
-            stroked=False,
         )
 
-        # Inner dot layer
+        # ── Solid centre dot ──
         dot_layer = pdk.Layer(
             "ScatterplotLayer",
             data=mock_sensors,
-            get_position=["longitude", "latitude"],
-            get_fill_color="fill_color",
-            get_radius=7,
+            get_position=["lon", "lat"],
+            get_fill_color=["fill_r", "fill_g", "fill_b", 230],
+            get_radius=5,
             radius_units="meters",
-            radius_min_pixels=6,
-            radius_max_pixels=14,
+            radius_min_pixels=5,
+            radius_max_pixels=12,
             pickable=True,
             stroked=True,
-            get_line_color=[255, 255, 255, 60],
+            get_line_color=[255, 255, 255, 80],
             line_width_min_pixels=1,
-        )
-
-        # Label text layer
-        text_layer = pdk.Layer(
-            "TextLayer",
-            data=mock_sensors,
-            get_position=["longitude", "latitude"],
-            get_text="sensor_id",
-            get_size=11,
-            get_color=[226, 232, 240, 220],
-            get_anchor="middle",
-            get_alignment_baseline="'bottom'",
-            get_pixel_offset=[0, -18],
-            font_family="JetBrains Mono, monospace",
-            font_weight=600,
-            pickable=False,
         )
 
         view_state = pdk.ViewState(
             latitude=BASE_LAT,
             longitude=BASE_LON,
             zoom=17,
-            pitch=40,        # slight 3D tilt for depth
+            pitch=0,
             bearing=0,
         )
 
         st.pydeck_chart(
             pdk.Deck(
-                layers=[ring_layer, dot_layer, text_layer],
+                layers=[halo_layer, dot_layer],
                 initial_view_state=view_state,
-                map_style="mapbox://styles/mapbox/dark-v11",
-                tooltip={
-                    "html": (
-                        "<div style='font-family:JetBrains Mono,monospace;font-size:12px;"
-                        "background:#111827;color:#e2e8f0;padding:10px 14px;border-radius:8px;"
-                        "border:1px solid #1e2a3a;line-height:1.6'>"
-                        "<b style='color:#67e8f9'>{sensor_id}</b><br>"
-                        "<span style='color:#94a3b8'>{label}</span><br>"
-                        "<span style='color:#f1f5f9'>{status_text}</span>"
-                        "</div>"
-                    ),
-                    "style": {"backgroundColor": "transparent", "color": "transparent"},
-                },
+                map_style="dark",
+                tooltip={"text": "{sensor_id} — {location}\nStatus: {status_text}"},
             ),
-            height=320,
+            height=310,
         )
 
-        # Map legend
+        # Legend
         st.markdown(
             "<div class='map-legend'>"
-            "<span><span class='legend-dot' style='background:#22d3ee;box-shadow:0 0 6px #22d3ee'></span>Clean</span>"
-            "<span><span class='legend-dot' style='background:#ef4444;box-shadow:0 0 6px #ef4444'></span>Vape Detected</span>"
+            "<span><span class='legend-dot' style='background:#3fb950'></span>Clean</span>"
+            "<span><span class='legend-dot' style='background:#f85149'></span>Vape Detected</span>"
             "</div>",
             unsafe_allow_html=True,
         )
 
         # Node status list
-        st.markdown(
-            "<div style='margin-top:16px;font-size:0.7rem;font-family:JetBrains Mono,monospace;"
-            "color:#475569;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px'>"
-            "Node Status</div>",
-            unsafe_allow_html=True,
-        )
+        st.markdown("<div style='margin-top:14px'></div>", unsafe_allow_html=True)
+        st.markdown("<div class='eyebrow'>Live Node Status</div>", unsafe_allow_html=True)
         for _, row in mock_sensors.iterrows():
             if row["vape_detected"]:
                 pill = "<span class='pill-red'><span class='pill-dot-red'></span>Vape Detected</span>"
@@ -519,8 +439,8 @@ with col_map:
                 pill = "<span class='pill-green'><span class='pill-dot-green'></span>Clean</span>"
             st.markdown(
                 f"<div class='node-card'>"
-                f"<div><span class='node-id'>{row['sensor_id']}</span>"
-                f"<span style='color:#64748b;margin-left:8px;font-size:0.78rem'>{row['label']}</span></div>"
+                f"<div><b style='color:#c9d1d9'>{row['sensor_id']}</b>"
+                f"<span style='color:#484f58;margin-left:8px;font-size:0.8rem'>{row['location']}</span></div>"
                 f"{pill}"
                 f"</div>",
                 unsafe_allow_html=True,
@@ -551,8 +471,7 @@ with st.container(border=True):
         f"<div class='eyebrow'>Sensor Trends · Last {HOURS_BACK} Hours</div>",
         unsafe_allow_html=True,
     )
-
-    tab1, tab2, tab3, tab4 = st.tabs(["Particles", "Air Quality", "Climate", "All Sensors"])
+    tab1, tab2, tab3, tab4 = st.tabs(["🟤 Particles", "🌫 Air Quality", "🌡 Climate", "📊 All Sensors"])
 
     with tab1:
         cols_p = [c for c in ["PM2.5", "PM10", "MQ135"] if c in chart_data.columns]
@@ -578,9 +497,9 @@ with st.container(border=True):
 # FOOTER
 # ─────────────────────────────────────────────
 st.markdown(
-    "<div style='text-align:center;color:#334155;font-size:0.72rem;"
-    "font-family:JetBrains Mono,monospace;padding:12px 0;letter-spacing:0.5px'>"
-    "AURAFARM AI · AUTO-REFRESHES EVERY 30 s · SENSOR DATA VIA GOOGLE SHEETS"
+    "<div style='text-align:center;color:#484f58;font-size:0.78rem;padding:8px 0'>"
+    "Aurafarm AI · Auto-refreshes every 30 s · "
+    "Sensor data streamed from Google Sheets"
     "</div>",
     unsafe_allow_html=True,
 )
