@@ -369,6 +369,172 @@ with col_hist:
                 unsafe_allow_html=True,
             )
 
+        # ── Quick stats ──────────────────────────────────
+        st.markdown("<div style='margin-top:18px'></div>", unsafe_allow_html=True)
+        st.markdown("<div class='eyebrow'>Quick Stats</div>", unsafe_allow_html=True)
+
+        if my_model and "is_vape" in df.columns:
+            vape_rows_qs = df[df["is_vape"] == 1].copy()
+
+            # Total events
+            if not vape_rows_qs.empty:
+                vape_rows_qs2 = vape_rows_qs.sort_values("Display_Time")
+                vape_rows_qs2["block"] = (
+                    vape_rows_qs2["Display_Time"].diff() > pd.Timedelta(minutes=5)
+                ).cumsum()
+                total_events = vape_rows_qs2["block"].nunique()
+
+                # Worst hour
+                vape_rows_qs2["hour"] = vape_rows_qs2["Display_Time"].dt.hour
+                worst_hour = int(vape_rows_qs2["hour"].value_counts().idxmax())
+                worst_hour_str = f"{worst_hour:02d}:00–{worst_hour+1:02d}:00"
+
+                # Longest clean streak (gap between vape events)
+                clean_rows = df[df["is_vape"] == 0].sort_values("Sort_Time")
+                if len(clean_rows) > 1:
+                    gaps = clean_rows["Sort_Time"].diff().dropna()
+                    longest_clean = gaps.max()
+                    h, rem = divmod(int(longest_clean.total_seconds()), 3600)
+                    m = rem // 60
+                    longest_clean_str = f"{h}h {m}m" if h else f"{m}m"
+                else:
+                    longest_clean_str = "N/A"
+
+                # Peak TVOC overall
+                peak_tvoc = f"{vape_rows_qs['TVOC'].max():.0f} ppb"
+            else:
+                total_events     = 0
+                worst_hour_str   = "—"
+                longest_clean_str = "—"
+                peak_tvoc        = "—"
+
+            qs1, qs2, qs3, qs4 = st.columns(4)
+            qs1.metric("Total Events",       str(total_events))
+            qs2.metric("Worst Hour",         worst_hour_str)
+            qs3.metric("Longest Clean Run",  longest_clean_str)
+            qs4.metric("Peak TVOC",          peak_tvoc)
+        else:
+            st.markdown(
+                "<div style='color:#484f58;font-size:0.85rem'>Model offline — stats unavailable.</div>",
+                unsafe_allow_html=True,
+            )
+
+        # ── Hourly heatmap ───────────────────────────────
+        st.markdown("<div style='margin-top:20px'></div>", unsafe_allow_html=True)
+        st.markdown("<div class='eyebrow'>Hourly Detection Heatmap</div>", unsafe_allow_html=True)
+
+        if my_model and "is_vape" in df.columns and not df[df["is_vape"] == 1].empty:
+            heat_df = df.copy()
+            heat_df["hour"] = heat_df["Display_Time"].dt.hour
+            hourly_counts = heat_df[heat_df["is_vape"] == 1].groupby("hour").size()
+            all_hours = pd.Series(0, index=range(24))
+            all_hours.update(hourly_counts)
+            max_count = max(all_hours.max(), 1)
+
+            cells = ""
+            for h in range(24):
+                count  = int(all_hours[h])
+                intensity = count / max_count
+                # Green → amber → red gradient
+                if intensity == 0:
+                    bg = "#161b22"
+                    border = "#21262d"
+                    txt_color = "#484f58"
+                elif intensity < 0.4:
+                    g = int(185 - intensity * 100)
+                    bg = f"rgba(63,{g},80,{0.3 + intensity * 0.4:.2f})"
+                    border = "#3fb950"
+                    txt_color = "#56d364"
+                elif intensity < 0.75:
+                    bg = f"rgba(210,153,34,{0.3 + intensity * 0.3:.2f})"
+                    border = "#d29922"
+                    txt_color = "#e3b341"
+                else:
+                    bg = f"rgba(248,81,73,{0.3 + intensity * 0.4:.2f})"
+                    border = "#f85149"
+                    txt_color = "#ffa198"
+
+                label = f"{h:02d}"
+                count_disp = str(count) if count > 0 else "·"
+                cells += (
+                    f"<div style='display:flex;flex-direction:column;align-items:center;"
+                    f"background:{bg};border:1px solid {border};border-radius:6px;"
+                    f"padding:6px 2px;min-width:0;flex:1'>"
+                    f"<span style='font-size:0.6rem;color:#6e7681;line-height:1'>{label}</span>"
+                    f"<span style='font-size:0.75rem;font-weight:700;color:{txt_color};line-height:1.4'>{count_disp}</span>"
+                    f"</div>"
+                )
+
+            st.markdown(
+                f"<div style='display:flex;gap:3px;width:100%;'>{cells}</div>"
+                f"<div style='font-size:0.72rem;color:#484f58;margin-top:6px'>"
+                f"Hour of day (00–23) · number = detection readings · colour = intensity</div>",
+                unsafe_allow_html=True,
+            )
+        else:
+            st.markdown(
+                "<div style='color:#484f58;font-size:0.85rem;padding:8px 0'>"
+                "No detection data to build heatmap.</div>",
+                unsafe_allow_html=True,
+            )
+
+        # ── AI Insight ───────────────────────────────────
+        st.markdown("<div style='margin-top:20px'></div>", unsafe_allow_html=True)
+        st.markdown("<div class='eyebrow'>AI Insight</div>", unsafe_allow_html=True)
+
+        if my_model and "is_vape" in df.columns:
+            vape_ai = df[df["is_vape"] == 1].copy()
+
+            if not vape_ai.empty:
+                vape_ai2 = vape_ai.sort_values("Display_Time")
+                vape_ai2["block"] = (
+                    vape_ai2["Display_Time"].diff() > pd.Timedelta(minutes=5)
+                ).cumsum()
+                n_events   = vape_ai2["block"].nunique()
+                peak_tvoc_val  = vape_ai["TVOC"].max()
+                peak_pm_val    = vape_ai["PM2.5"].max()
+                vape_ai["hour"] = vape_ai["Display_Time"].dt.hour
+                top_hour   = int(vape_ai["hour"].value_counts().idxmax())
+                top_hour_str = f"{top_hour:02d}:00–{top_hour+1:02d}:00"
+                avg_tvoc_clean = df[df["is_vape"] == 0]["TVOC"].mean()
+                tvoc_spike_pct = ((peak_tvoc_val - avg_tvoc_clean) / max(avg_tvoc_clean, 1)) * 100
+
+                if n_events == 1:
+                    freq_note = "A single vaping event has been recorded."
+                elif n_events <= 3:
+                    freq_note = f"{n_events} vaping events detected — low but worth monitoring."
+                elif n_events <= 8:
+                    freq_note = f"{n_events} events detected — recurring pattern emerging."
+                else:
+                    freq_note = f"{n_events} events detected — high frequency, action recommended."
+
+                if tvoc_spike_pct > 150:
+                    tvoc_note = f"TVOC spiked {tvoc_spike_pct:.0f}% above the clean-air baseline during events — significant chemical load."
+                elif tvoc_spike_pct > 50:
+                    tvoc_note = f"TVOC rose {tvoc_spike_pct:.0f}% above baseline — moderate chemical signature."
+                else:
+                    tvoc_note = f"TVOC elevation was mild ({tvoc_spike_pct:.0f}% above baseline)."
+
+                insight = (
+                    f"{freq_note} Most activity concentrates around <b style='color:#e6edf3'>{top_hour_str}</b>. "
+                    f"{tvoc_note} Peak PM 2.5 reached <b style='color:#e6edf3'>{peak_pm_val:.1f} μg/m³</b>. "
+                    f"Consider scheduling checks or improving ventilation during that window."
+                )
+            else:
+                insight = "✅ No vaping events detected in available data. Air quality has remained within normal parameters across all sensors."
+
+            st.markdown(
+                f"<div style='background:#0d1117;border:1px solid #21262d;border-left:3px solid #3fb950;"
+                f"border-radius:8px;padding:14px 16px;font-size:0.88rem;color:#8b949e;line-height:1.7'>"
+                f"{insight}</div>",
+                unsafe_allow_html=True,
+            )
+        else:
+            st.markdown(
+                "<div style='color:#484f58;font-size:0.85rem'>Model offline — insight unavailable.</div>",
+                unsafe_allow_html=True,
+            )
+
 with col_map:
     with st.container(border=True):
         st.markdown("<div class='eyebrow'>Facility Sensor Network</div>", unsafe_allow_html=True)
