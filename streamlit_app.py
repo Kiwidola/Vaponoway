@@ -171,7 +171,7 @@ df = load_sensor_data()
 # SIDEBAR
 # ─────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("## 🌿 Aurafarm AI")
+    st.markdown("## Aurafarm AI")
     st.markdown("<small style='color:#8b949e'>Environmental Monitor</small>", unsafe_allow_html=True)
     st.divider()
 
@@ -193,7 +193,7 @@ with st.sidebar:
     hours_back = st.slider("Hours to display", min_value=1, max_value=72, value=24, step=1)
 
     st.divider()
-    if st.button("🔄 Refresh now"):
+    if st.button("Refresh now"):
         st.cache_data.clear()
         st.rerun()
 
@@ -265,12 +265,12 @@ def safe_delta(col):
 
 c1, c2, c3, c4, c5, c6 = st.columns(6)
 
-c1.metric("🌡 Temp",        f"{latest['Temp']} °C",      delta=safe_delta("Temp"))
-c2.metric("💧 Humidity",    f"{latest['Humidity']} %",   delta=safe_delta("Humidity"))
-c3.metric("🌫 TVOC",        f"{latest['TVOC']} ppb",     delta=safe_delta("TVOC"),  delta_color="inverse")
-c4.metric("💨 PM 2.5",      f"{latest['PM2.5']} μg/m³",  delta=safe_delta("PM2.5"), delta_color="inverse")
-c5.metric("🟤 eCO₂",        f"{latest['eCO2']} ppm",     delta=safe_delta("eCO2"),  delta_color="inverse")
-c6.metric("🔬 MQ135",       f"{latest['MQ135']}",        delta=safe_delta("MQ135"), delta_color="inverse")
+c1.metric("Temp",        f"{latest['Temp']} °C",      delta=safe_delta("Temp"))
+c2.metric("Humidity",    f"{latest['Humidity']} %",   delta=safe_delta("Humidity"))
+c3.metric("TVOC",        f"{latest['TVOC']} ppb",     delta=safe_delta("TVOC"),  delta_color="inverse")
+c4.metric("PM 2.5",      f"{latest['PM2.5']} μg/m³",  delta=safe_delta("PM2.5"), delta_color="inverse")
+c5.metric("eCO₂",        f"{latest['eCO2']} ppm",     delta=safe_delta("eCO2"),  delta_color="inverse")
+c6.metric("MQ135",       f"{latest['MQ135']}",        delta=safe_delta("MQ135"), delta_color="inverse")
 
 st.divider()
 
