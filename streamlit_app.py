@@ -337,6 +337,7 @@ with col_map:
 
     live_state = 1 if prediction == 1 else 0
 
+    # Single sensor
     mock_sensors = pd.DataFrame({
         "sensor_id": ["Main Sensor"],
         "latitude": [BASE_LAT],
@@ -363,7 +364,35 @@ with col_map:
         pickable=True,
     )
 
-st.divider()
+    view_state = pdk.ViewState(
+        latitude=BASE_LAT,
+        longitude=BASE_LON,
+        zoom=16.5,
+        pitch=0,
+    )
+
+    st.pydeck_chart(
+        pdk.Deck(
+            layers=[layer],
+            initial_view_state=view_state,
+            map_style="dark",
+            tooltip={"text": "Sensor: {sensor_id}\nStatus: {air_quality}"},
+        )
+    )
+
+    # Live Node Status
+    st.markdown("**Live Node Status**")
+    for _, row in mock_sensors.iterrows():
+        pill_class = "pill-red" if row["vape_detected"] else "pill-green"
+        st.markdown(
+            f"""
+            <div class='node-card'>
+                <span>{row['sensor_id']}</span>
+                <span class='{pill_class}'>{row['air_quality']}</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
 # ─────────────────────────────────────────────
 # TREND CHARTS  (respect sidebar hours_back)
