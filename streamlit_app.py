@@ -127,10 +127,10 @@ st.markdown(
 # ─────────────────────────────────────────────
 # AUTO-REFRESH  (no extra package needed)
 # ─────────────────────────────────────────────
-st.markdown(
-    f'<meta http-equiv="refresh" content="{REFRESH_MS // 1000}">',
-    unsafe_allow_html=True,
-)
+#st.markdown(
+#    f'<meta http-equiv="refresh" content="{REFRESH_MS // 1000}">',
+#    unsafe_allow_html=True,
+#)
 
 # ─────────────────────────────────────────────
 # LOAD MODEL
