@@ -43,8 +43,7 @@ def load_model():
         except Exception: return None
     return None
 
-# Auto-refresh disabled by removing (ttl=30)
-@st.cache_data
+@st.cache_data(ttl=30)
 def load_sensor_data():
     try:
         df = pd.read_csv(SHEET_URL)
