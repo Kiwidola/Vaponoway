@@ -252,13 +252,14 @@ def safe_delta(col):
 
 with st.container(border=True):
     st.markdown("<div class='eyebrow'>Live Readings</div>", unsafe_allow_html=True)
-    c1, c2, c3, c4, c5, c6 = st.columns(6)
-    c1.metric(" Temp",     f"{latest['Temp']} °C",      delta=safe_delta("Temp"))
-    c2.metric(" Humidity", f"{latest['Humidity']} %",   delta=safe_delta("Humidity"))
-    c3.metric(" TVOC",     f"{latest['TVOC']} ppb",     delta=safe_delta("TVOC"),  delta_color="inverse")
-    c4.metric(" PM 2.5",   f"{latest['PM2.5']} μg/m³",  delta=safe_delta("PM2.5"), delta_color="inverse")
-    c5.metric(" eCO₂",     f"{latest['eCO2']} ppm",     delta=safe_delta("eCO2"),  delta_color="inverse")
-    c6.metric(" MQ135",    f"{latest['MQ135']}",        delta=safe_delta("MQ135"), delta_color="inverse")
+    c1, c2, c3, c4, c5, c6, c7 = st.columns(7)
+    c1.metric(" TVOC",     f"{latest['TVOC']} ppb",     delta=safe_delta("TVOC"),  delta_color="inverse")
+    c2.metric(" PM 2.5",   f"{latest['PM2.5']} μg/m³",  delta=safe_delta("PM2.5"), delta_color="inverse")
+    c3.metric(" eCO₂",     f"{latest['eCO2']} ppm",     delta=safe_delta("eCO2"),  delta_color="inverse")
+    c4.metric(" MQ7",      f"{latest['CH0']}",          delta=safe_delta("CH0"),   delta_color="inverse")
+    c5.metric(" MQ135",    f"{latest['MQ135']}",        delta=safe_delta("MQ135"), delta_color="inverse")
+    c6.metric(" Temp",     f"{latest['Temp']} °C",      delta=safe_delta("Temp"))
+    c7.metric(" Humidity", f"{latest['Humidity']} %",   delta=safe_delta("Humidity"))
 
 # ─────────────────────────────────────────────
 # DETECTION HISTORY  +  FACILITY MAP
