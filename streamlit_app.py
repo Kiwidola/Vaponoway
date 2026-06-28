@@ -1,6 +1,7 @@
 import os
 import joblib
 import pandas as pd
+import pydeck as pdk
 import streamlit as st
 import plotly.express as px
 from datetime import timedelta
@@ -15,6 +16,9 @@ SHEET_URL   = (
     "2PACX-1vT8Oho84O3uIYEEYE2iNub7I5Ktv4mTUteMkdBR4NpBTlJZS0tY2VFXmqM-_XlGIgSaeUIR7VjpnWSZ"
     "/pub?output=csv"
 )
+# Fixed location for the single sensor
+MY_LAT = 18.5847
+MY_LON = 99.0256
 
 FEATURE_COLS   = ["TVOC", "eCO2", "Temp", "Humidity", "PM2.5", "CH0", "CH3", "MQ135"]
 MAPPING_DICT   = {
@@ -39,7 +43,7 @@ def load_model():
         except Exception: return None
     return None
 
-# Auto-refresh disabled by removing ttl
+# Auto-refresh disabled by removing (ttl=30)
 @st.cache_data
 def load_sensor_data():
     try:
@@ -92,18 +96,36 @@ st.caption(f"Last updated: {latest['Display_Time']}")
 st.divider()
 
 # ─────────────────────────────────────────────
-# 5. STATUS DISPLAY
+# 5. MAP & LIVE DATA
 # ─────────────────────────────────────────────
-st.subheader("Current Status")
+st.subheader("Map")
 live_state = 1 if prediction == 1 else 0
-status_text = 'Poor (Vape)' if live_state == 1 else 'Good'
-color = "#ff4b4b" if live_state == 1 else "#00cc66"
 
-st.markdown(f"### System Status: <span style='color:{color};'>{status_text}</span>", unsafe_allow_html=True)
-st.write("---")
-st.write("#### Detailed Sensor Readings")
-cols_to_show = ["Timestamp", "TVOC", "eCO2", "Temp", "Humidity", "PM2.5"]
-st.dataframe(latest[cols_to_show].T.rename(columns={latest.name: "Value"}), use_container_width=True)
+# Single sensor data
+sensor_data = pd.DataFrame({
+    'sensor_id': ['SN-01 (Main Location)'],
+    'latitude': [MY_LAT],
+    'longitude': [MY_LON],
+    'vape_detected': [live_state],
+    'air_quality': ['Poor (Vape)' if live_state == 1 else 'Good']
+})
+sensor_data["color"] = sensor_data["vape_detected"].map({1: [255, 75, 75, 255], 0: [0, 204, 102, 255]})
+
+col_map, col_text = st.columns([2, 1])
+with col_map:
+    view_state = pdk.ViewState(latitude=MY_LAT, longitude=MY_LON, zoom=17, pitch=0)
+    layer = pdk.Layer(
+        "ScatterplotLayer", data=sensor_data, get_position=["longitude", "latitude"], 
+        get_fill_color="color", get_radius=4, radius_units="meters", pickable=True
+    )
+    st.pydeck_chart(pdk.Deck(layers=[layer], initial_view_state=view_state, tooltip={"text": "Sensor: {sensor_id}\nStatus: {air_quality}"}))
+
+with col_text:
+    st.write("### Live Sensor Data")
+    cols_to_show = ["Timestamp", "TVOC", "eCO2", "Temp", "Humidity", "PM2.5"]
+    st.dataframe(latest[cols_to_show].T.rename("Value"), use_container_width=True)
+    color = "#ff4b4b" if live_state == 1 else "#00cc66"
+    st.markdown(f"**Status:** <span style='color:{color}; font-weight:bold;'>{sensor_data.iloc[0]['air_quality']}</span>", unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────
 # 6. TRENDS
